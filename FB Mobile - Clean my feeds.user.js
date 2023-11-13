@@ -2,7 +2,6 @@
 // @name        FB Mobile - Clean my feeds
 // @namespace   Violentmonkey Scripts
 // @match       https://m.facebook.com/*
-// @grant       unsafeWindow
 // @version     0.5
 // @run-at      document-end
 // @author      https://github.com/webdevsk
