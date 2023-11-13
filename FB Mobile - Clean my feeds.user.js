@@ -2,8 +2,8 @@
 // @name        FB Mobile - Clean my feeds
 // @namespace   Violentmonkey Scripts
 // @match       https://m.facebook.com/*
-// @grant       none
-// @version     0.2
+// @grant       unsafeWindow
+// @version     0.5
 // @run-at      document-end
 // @author      https://github.com/webdevsk
 // @description 10/20/2023, 7:25:05 PM
@@ -23,8 +23,6 @@
 
 const devMode = false
 const showPlaceholder = true
-//to be implemented later
-const ignored = []
 
 
 // Make sure this is the React-Mobile version of facebook
@@ -39,8 +37,8 @@ if (devMode) {
     var whiteCount = 0
     var blackCount = 0
 
-    const overlay = document.createElement("div")
-    Object.assign(overlay.style, {
+    const devPanel = document.createElement("div")
+    Object.assign(devPanel.style, {
         position: "fixed",
         top: 0,
         right: 0,
@@ -60,18 +58,33 @@ if (devMode) {
     const blackList = document.createElement("p")
     blackList.innerHTML = `Blacklisted: <span id="blacklist-count">0</span>`
 
-    overlay.appendChild(whiteList)
-    overlay.appendChild(blackList)
-    document.body.appendChild(overlay)
+    devPanel.appendChild(whiteList)
+    devPanel.appendChild(blackList)
+    document.body.appendChild(devPanel)
+}
+
+// Get languages
+const lang = navigator.languages
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////                   Labels           ////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+// Suggested
+const Suggested = {
+    'en-US': "Suggested"
+}
+
+// Sponsored
+const Sponsored = {
+    'en-US': "Sponsored"
 }
 
 //Whatever we wanna do with the convicts
 findConvicts((convicts) => {
     console.table(convicts)
-
     for (const { element, reason, author } of convicts) {
-
-        // reasons.add(reason)
+        console.log("Loop", element.dataset.trackingDurationId)
         element.tabIndex = "-1"
         element.dataset.purged = "true"
 
@@ -87,13 +100,24 @@ findConvicts((convicts) => {
                 position: "relative"
             })
 
-            element.appendChild(document.createElement("div")).innerHTML = `
-                <div style="position: absolute; inset: 0; background: #242526; color: #e4e6eb; display: grid; place-items: center; padding-inline: .5rem;">
-                    <p style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap; width: 100%; text-align: center;">
-                        Purged: ${author} (${reason})
-                    </p>
-                </div>
+            const overlay = document.createElement("div")
+            Object.assign(overlay.style, {
+                position: "absolute",
+                inset: 0,
+                background: "#242526",
+                color: "#e4e6eb",
+                display: "grid",
+                pointerEvents: "auto",
+                placeItems: "center",
+                paddingInline: ".5rem"
+            })
+            overlay.innerHTML = `
+                <p style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap; width: 100%; text-align: center;">
+                    Purged: ${author} (${reason})
+                </p>
             `
+            element.appendChild(overlay)
+
         } else {
             // Hide elements by resizing to 0px
             // Removing from DOM or display:none causes issues loading newer posts
@@ -116,8 +140,9 @@ findConvicts((convicts) => {
         // Removing image links to restrict downloading unnecessary content
         for (const image of element.querySelectorAll("img")) {
             image.dataset.src = image.src
-            //Clearing out src doesnt work as it gets populated again automatically
+            //Clearing out src doesn't work as it gets populated again automatically
             image.removeAttribute("src")
+            image.dataset.nulled = true
         }
     }
 
@@ -135,14 +160,10 @@ function findConvicts(callback) {
         for (const mutation of mutationList) {
             if (!(mutation.type === "childList" && mutation.target.matches("[data-type='vscroller']") && mutation.addedNodes.length !== 0)) continue
             // console.log(mutation)
-
+            // console.table([...mutation.addedNodes].map(item => ({elm:item ,id: item.dataset.trackingDurationId, height: item.dataset.actualHeight})))
             for (const element of mutation.addedNodes) {
                 // Check if element is an actual facebook post
                 if (!(element.hasAttribute("data-tracking-duration-id"))) continue
-
-                // Enhance videos
-                // if (element.querySelector("[data-video-id]")) enhanceVideo(element.querySelector("[data-video-id]"))
-
 
                 let suspect = false
                 let reason
@@ -150,16 +171,16 @@ function findConvicts(callback) {
                 let author
 
                 for (const span of element.querySelectorAll("span.f5")) {
-                    if (!(/Suggested|Sponsored/g.test(span.textContent))) continue
+                    if (!(/Suggested|Sponsored/g.test(span.innerHTML))) continue
                     suspect = true
-                    reason = span.textContent.split("󰞋")[0]
-                    raw = span.textContent
+                    reason = span.innerHTML.split("󰞋")[0]
+                    raw = span.innerHTML
                     break
                 }
 
                 if (suspect) {
-                    author = element.querySelector("span.f2").textContent
-                    if (ignored.includes(author)) suspect = false
+                    author = element.querySelector("span.f2").innerHTML
+                    if (author.includes("Sponsored")) console.log(element)
                 }
 
                 if (suspect) {
@@ -178,7 +199,6 @@ function findConvicts(callback) {
             }
         }
 
-
         if (convicts.length !== 0) callback(convicts)
 
         // Set new calculated height to the bottom ".filler" element
@@ -193,6 +213,8 @@ function findConvicts(callback) {
 }
 
 function setFillerHeight(mutationList) {
+    const fillerNode = document.querySelectorAll('.filler')[1]
+    if (!fillerNode) return
     let newHeight = 0
     for (const mutation of mutationList) {
         if (!(mutation.type === "childList" && mutation.target.matches("[data-type='vscroller']") && mutation.addedNodes.length !== 0)) continue
@@ -201,55 +223,21 @@ function setFillerHeight(mutationList) {
             accumulator += element.classList.contains('displayed') || element.classList.contains('filler') ? 0 : element.clientHeight
         ), 0)
     }
-    // console.log(newHeight)
-    document.querySelectorAll('.filler')[1].style.height = newHeight
+    fillerNode.style.height = newHeight
 }
 
 
 function updateWhiteCount(amount) {
     if (!devMode) return
     whiteCount += amount
-    document.querySelector('#whitelist-count').textContent = whiteCount
+    document.querySelector('#whitelist-count').innerHTML = whiteCount
 }
 
 
 function updateBlackCount(amount) {
     if (!devMode) return
     blackCount += amount
-    document.querySelector('#blacklist-count').textContent = blackCount
-}
-
-
-function enhanceVideo(elm) {
-    const config = JSON.parse(elm.dataset.extra)
-    // console.log(config)
-    const newConfig = {
-        ...config,
-        bitrate: 2000
-    }
-
-    elm.dataset.extra = JSON.stringify(newConfig)
-    // console.log(JSON.parse(elm.dataset.extra))
-}
-
-
-async function fullScreenPWA() {
-    const manifestNode = document.querySelector('link[rel="manifest"]')
-    const manifest = await fetch(manifestNode.href).then(data => data.json())
-
-    const newManifest = JSON.stringify({
-        ...manifest,
-        display: "standalone"
-    })
-
-    const blob = new Blob([newManifest], { type: 'application/json' })
-    const manifestURL = URL.createObjectURL(blob)
-    manifestNode.setAttribute("href", manifestURL)
-    // const meta = document.createElement("meta")
-    // meta.setAttribute("http-equiv", "Content-Security-Policy")
-    // meta.content = "default-src 'self'; script-src 'self' 'unsafe-inline' https:; manifest-src 'self'"
-    // document.head.appendChild(meta)
-    // manifestNode.href = `data:application/manifest+json,${encodeURIComponent(newManifest)}`
+    document.querySelector('#blacklist-count').innerHTML = blackCount
 }
 
 
