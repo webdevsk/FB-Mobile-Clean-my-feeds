@@ -53,6 +53,8 @@ C-->|Unwanted Posts| E[Hidden]
 - English
 - বাংলা
 
+**⚠️ Still unstable. Works best on English**
+
 _You can contribute by adding more languages_
 
 ### How to use
