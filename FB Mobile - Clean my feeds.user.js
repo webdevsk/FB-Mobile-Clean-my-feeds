@@ -2,10 +2,11 @@
 // @name        FB Mobile - Clean my feeds
 // @namespace   Violentmonkey Scripts
 // @match       https://m.facebook.com/*
-// @version     0.5
+// @version     0.20
+// @icon        data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAAbwAAAG8B8aLcQwAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAHZSURBVDiNnZFLSFRxFMa/c1/jjIzYpGEjxFQUCC5a9BKJIAtRzEXEFaJFZXRrIQMtk3a1lWo3iwqkTS0kZyGCA4VNFNEmWwU9MIoiscZp7jzuvf9zWogXogS9Z3fO4fv4feeQiCBKjY8M9Nca3lUtkhqAUnwNoPcUheC63b+z5qm3nmelIxGwkMMir+/MzJSNzYodZ7/ZolKXADoDAJsmSJXahpXiXxPThdlIBlCSFUh+rd1wBNvuttLu1sOGae7zYjy4Nt8QgXpoXbzf9/HVYNfi3O+KK5XP5V3rEti2rde3pHvyuVtFAMB8/JjWJLlEU0M7nlnE0e1fjGVqPgVg4b8E0rHnHoSeDY1mx/CCUiIyiVZdQ8YE7bVgdpCWCqrj6xIQ0Rtm/qlB3okXywHoDJcxAnWa0OPtpb8M8nPP06V6tVD3/Mqj2zcOApjA0/g5AU6HYl7llcAANP4WHnH6SfEQ65hPJuJdvh8cuDs165y8nO1bqiZb4KoyVhhYVoDLqxEDAwT+EBqwwAGwm4jQmmyGF/g3Y3pi+MLU2U9UCjKUwCga/BUmAT8CiDIAnRfCyI8LxSNCeABgh1uro+zWlq7YQ9v++WXe7GWDziu/bcS0+AQGvr8EgD/aK7uaswjePgAAAABJRU5ErkJggg==
 // @run-at      document-end
 // @author      https://github.com/webdevsk
-// @description 10/20/2023, 7:25:05 PM
+// @description Removed Unwanted Posts from FB Mobile Newsfeeds
 // @license     MIT
 // ==/UserScript==
 
@@ -62,28 +63,39 @@ if (devMode) {
     document.body.appendChild(devPanel)
 }
 
-// Get languages
-const lang = navigator.languages
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////                   Labels           ////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+// this version of fb does not update navigator.lang on language change
+// navigator.langs contain all of your preset languages. So we need to loop through it
+const getLabels = obj => navigator.languages.map(lang => obj[lang])
+
+// Placeholder Message
+const placeholderMsg = getLabels({
+    'en-US': 'Removed',
+    'bn': 'বাতিল'
+}).at(-1)
+
 // Suggested
-const Suggested = {
-    'en-US': "Suggested"
-}
+const suggested = getLabels({
+    'en-US': 'Suggested for you',
+    'bn': 'আপনার জন্য প্রস্তাবিত'
+})
 
 // Sponsored
-const Sponsored = {
-    'en-US': "Sponsored"
-}
+const sponsored = getLabels({
+    'en-US': 'Sponsored',
+    'bn': 'স্পনসর্ড'
+})
+
+
 
 //Whatever we wanna do with the convicts
 findConvicts((convicts) => {
     console.table(convicts)
     for (const { element, reason, author } of convicts) {
-        console.log("Loop", element.dataset.trackingDurationId)
         element.tabIndex = "-1"
         element.dataset.purged = "true"
 
@@ -112,7 +124,7 @@ findConvicts((convicts) => {
             })
             overlay.innerHTML = `
                 <p style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap; width: 100%; text-align: center;">
-                    Purged: ${author} (${reason})
+                    ${placeholderMsg}: ${author} (${reason})
                 </p>
             `
             element.appendChild(overlay)
@@ -170,7 +182,7 @@ function findConvicts(callback) {
                 let author
 
                 for (const span of element.querySelectorAll("span.f5")) {
-                    if (!(/Suggested|Sponsored/g.test(span.innerHTML))) continue
+                    if (![...suggested, ...sponsored].some(str => span.innerHTML.includes(str))) continue
                     suspect = true
                     reason = span.innerHTML.split("󰞋")[0]
                     raw = span.innerHTML
