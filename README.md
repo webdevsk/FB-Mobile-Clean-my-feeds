@@ -17,7 +17,19 @@ Hides Suggested and Unwanted posts from **Facebook Mobile** feed. Get a clean Ne
 
 **⚠️ Works on Android Only**
 
-### Removes:
+<details>
+<summary>Table of contents</summary>
+
+- [Removes](#removes)
+- [How it works](#how-it-works)
+- [Languages Supported](#languages-supported)
+- [How to use](#how-to-use)
+  - [Want to use it like an App?](#want-to-use-it-like-an-app)
+- [Known issues (Must Read)](#known-issues-must-read)
+
+</details>
+
+### Removes
 
 - Suggested for you
 - Sponsored
@@ -26,7 +38,7 @@ Facebook has an enhanced Mobile version of facebook which only works on Chromium
 
 **ℹ️ So keep the original App installed and use it only for leisure browsing.**
 
-### How it works:
+### How it works
 
 ```mermaid
 graph TD;
@@ -36,14 +48,14 @@ C-->|Regular Posts| D[Shown]
 C-->|Unwanted Posts| E[Hidden]
 ```
 
-### Languages Supported:
+### Languages Supported
 
 - English
 - বাংলা
 
 _You can contribute by adding more languages_
 
-### How to use:
+### How to use
 
 1. Find an `Android` phone somewhere.
 1. Install [Kiwi Browser](https://play.google.com/store/apps/details?id=com.kiwibrowser.browser) from PlayStore.
