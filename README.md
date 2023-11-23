@@ -21,11 +21,11 @@ Hides Suggested and Unwanted posts from **Facebook Mobile** feed. Get a clean Ne
 <summary>Table of contents</summary>
 
 - [Removes](#removes)
-- [How it works](#how-it-works)
 - [Languages Supported](#languages-supported)
 - [How to use](#how-to-use)
   - [Want to use it like an App?](#want-to-use-it-like-an-app)
 - [Known issues (Must Read)](#known-issues-must-read)
+- [How it works](#how-it-works)
 
 </details>
 
@@ -33,20 +33,12 @@ Hides Suggested and Unwanted posts from **Facebook Mobile** feed. Get a clean Ne
 
 - Suggested for you
 - Sponsored
+- Unlabeled posts containing "Follow" button
+- Unlabeled posts containing "Join" button
 
 Facebook has an enhanced Mobile version of facebook which only works on Chromium browsers. The browsing experience is not as good as the App you are used to. It shows low quality photos and videos. But this is all we got that we can inject a script into.
 
 **ℹ️ So keep the original App installed and use it only for leisure browsing.**
-
-### How it works
-
-```mermaid
-graph TD;
-A[DOM Loads]-->B[Waits for new posts using Mutation Observer];
-B-->C[Searches through new posts]
-C-->|Regular Posts| D[Shown]
-C-->|Unwanted Posts| E[Hidden]
-```
 
 ### Languages Supported
 
@@ -86,10 +78,20 @@ _You can contribute by adding more languages_
 - **Firefox based browsers not supported**
   - The enhanced version of `m.facebook` only loads on Chromium browsers. Nothing I can do about it for now.
 - **Api rate limit** **⚠️Please scroll slowly**
-  - After a while they keep pushing hundreds of Suggested posts in a row. As you keep scrolling way faster than usual, it is possible to hit Api rate limit.
+  - After a while they keep pushing hundreds of Suggested posts in a row. As you keep scrolling faster than usual, it is possible to hit Api rate limit.
     `Or in general term: they put a timer between each post requests and you asked for posts before the timer ended`
 - **Doesn't work when coming back after a break**
   - Instead of doing the "Pull down to refresh", press the 3 dot menu and press Refresh there.
+
+### How it works
+
+```mermaid
+graph TD;
+A[DOM Loads]-->B[Waits for new posts using Mutation Observer];
+B-->C[Searches through new posts]
+C-->|Regular Posts| D[Shown]
+C-->|Unwanted Posts| E[Hidden]
+```
 
 <br />
 
