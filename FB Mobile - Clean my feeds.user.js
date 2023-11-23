@@ -2,11 +2,11 @@
 // @name        FB Mobile - Clean my feeds
 // @namespace   Violentmonkey Scripts
 // @match       https://m.facebook.com/*
-// @version     0.21
+// @version     0.30
 // @icon        data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAAbwAAAG8B8aLcQwAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAHZSURBVDiNnZFLSFRxFMa/c1/jjIzYpGEjxFQUCC5a9BKJIAtRzEXEFaJFZXRrIQMtk3a1lWo3iwqkTS0kZyGCA4VNFNEmWwU9MIoiscZp7jzuvf9zWogXogS9Z3fO4fv4feeQiCBKjY8M9Nca3lUtkhqAUnwNoPcUheC63b+z5qm3nmelIxGwkMMir+/MzJSNzYodZ7/ZolKXADoDAJsmSJXahpXiXxPThdlIBlCSFUh+rd1wBNvuttLu1sOGae7zYjy4Nt8QgXpoXbzf9/HVYNfi3O+KK5XP5V3rEti2rde3pHvyuVtFAMB8/JjWJLlEU0M7nlnE0e1fjGVqPgVg4b8E0rHnHoSeDY1mx/CCUiIyiVZdQ8YE7bVgdpCWCqrj6xIQ0Rtm/qlB3okXywHoDJcxAnWa0OPtpb8M8nPP06V6tVD3/Mqj2zcOApjA0/g5AU6HYl7llcAANP4WHnH6SfEQ65hPJuJdvh8cuDs165y8nO1bqiZb4KoyVhhYVoDLqxEDAwT+EBqwwAGwm4jQmmyGF/g3Y3pi+MLU2U9UCjKUwCga/BUmAT8CiDIAnRfCyI8LxSNCeABgh1uro+zWlq7YQ9v++WXe7GWDziu/bcS0+AQGvr8EgD/aK7uaswjePgAAAABJRU5ErkJggg==
 // @run-at      document-end
 // @author      https://github.com/webdevsk
-// @description Removed Unwanted Posts from FB Mobile Newsfeeds
+// @description Removes Sponsored and Suggested posts from Facebook mobile chromium/react version
 // @license     MIT
 // ==/UserScript==
 
@@ -70,7 +70,7 @@ if (devMode) {
 
 // this version of fb does not update navigator.lang on language change
 // navigator.langs contain all of your preset languages. So we need to loop through it
-const getLabels = obj => navigator.languages.map(lang => obj[lang])
+const getLabels = obj => navigator.languages.map(lang => obj[lang]).flat()
 
 console.log(navigator.languages)
 // Placeholder Message
@@ -83,8 +83,8 @@ const placeholderMsg = getLabels({
 
 // Suggested
 const suggested = getLabels({
-    'en-US': 'Suggested for you',
-    'en': 'Suggested for you',
+    'en-US': 'Suggested',
+    'en': 'Suggested',
     'bn': 'আপনার জন্য প্রস্তাবিত'
 })
 
@@ -93,6 +93,12 @@ const sponsored = getLabels({
     'en-US': 'Sponsored',
     'en': 'Sponsored',
     'bn': 'স্পনসর্ড'
+})
+// Uncategorized
+const unCategorized = getLabels({
+    'en-US': ['Join', 'Follow'],
+    'en': ['Join', 'Follow'],
+    'bn': ['ফলো করুন', 'যোগ দিন']
 })
 
 
@@ -107,7 +113,7 @@ findConvicts((convicts) => {
 
         // Sponsored posts get removed in an "out of order" fashion automatically.
         // Having placeholder inside them results in a  scroll jump
-        if (showPlaceholder && reason !== "Sponsored") {
+        if (showPlaceholder && !(sponsored.includes(reason))) {
             element.dataset.actualHeight = "32"
             Object.assign(element.style, {
                 height: "32px",
@@ -164,6 +170,8 @@ findConvicts((convicts) => {
 
 })
 
+// autoReloadAfterIdle()
+
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////         function definitions       ////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -187,11 +195,21 @@ function findConvicts(callback) {
                 let author
 
                 for (const span of element.querySelectorAll("span.f5")) {
-                    if (![...suggested, ...sponsored].some(str => span.innerHTML.includes(str))) continue
+                    if (![...suggested, ...sponsored].some(str => span.textContent.includes(str))) continue
                     suspect = true
                     reason = span.innerHTML.split("󰞋")[0]
                     raw = span.innerHTML
                     break
+                }
+
+                if (!suspect) {
+                    const span = element.querySelector("span.f2:not(.a)")
+
+                    if (span && unCategorized.some(str => span.textContent === str)) {
+                        suspect = true
+                        reason = span.textContent
+                        raw = span.textContent
+                    }
                 }
 
                 if (suspect) {
@@ -215,11 +233,13 @@ function findConvicts(callback) {
             }
         }
 
-        if (convicts.length !== 0) callback(convicts)
+        if (!convicts.length) return
 
+        callback(convicts)
         // Set new calculated height to the bottom ".filler" element
         // We need to calculate it after all the convicts are taken care of
-        setFillerHeight(mutationList)
+        // *** It seems we dont need it anymore. Completely hiding "Sponsored" posts fixed it for us
+        // setFillerHeight(mutationList)
     })
 
     observer.observe(root, {
@@ -228,6 +248,7 @@ function findConvicts(callback) {
     })
 }
 
+// setFillerHeight is omitted
 function setFillerHeight(mutationList) {
     const fillerNode = document.querySelectorAll('.filler')[1]
     if (!fillerNode) return
@@ -256,4 +277,17 @@ function updateBlackCount(amount) {
     document.querySelector('#blacklist-count').innerHTML = blackCount
 }
 
+function autoReloadAfterIdle(minutes = 15) {
+    let leaveTime
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            leaveTime = new Date()
+        } else {
+            let currentTime = new Date()
+            let timeDiff = (currentTime - leaveTime) / 60000
+            if (timeDiff > minutes) location.reload()
+        }
+    })
+}
 
