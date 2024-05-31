@@ -2,12 +2,15 @@
 // @name        FB Mobile - Clean my feeds
 // @namespace   Violentmonkey Scripts
 // @match       https://m.facebook.com/*
-// @version     0.30
+// @version     0.40
 // @icon        data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAAbwAAAG8B8aLcQwAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAHZSURBVDiNnZFLSFRxFMa/c1/jjIzYpGEjxFQUCC5a9BKJIAtRzEXEFaJFZXRrIQMtk3a1lWo3iwqkTS0kZyGCA4VNFNEmWwU9MIoiscZp7jzuvf9zWogXogS9Z3fO4fv4feeQiCBKjY8M9Nca3lUtkhqAUnwNoPcUheC63b+z5qm3nmelIxGwkMMir+/MzJSNzYodZ7/ZolKXADoDAJsmSJXahpXiXxPThdlIBlCSFUh+rd1wBNvuttLu1sOGae7zYjy4Nt8QgXpoXbzf9/HVYNfi3O+KK5XP5V3rEti2rde3pHvyuVtFAMB8/JjWJLlEU0M7nlnE0e1fjGVqPgVg4b8E0rHnHoSeDY1mx/CCUiIyiVZdQ8YE7bVgdpCWCqrj6xIQ0Rtm/qlB3okXywHoDJcxAnWa0OPtpb8M8nPP06V6tVD3/Mqj2zcOApjA0/g5AU6HYl7llcAANP4WHnH6SfEQ65hPJuJdvh8cuDs165y8nO1bqiZb4KoyVhhYVoDLqxEDAwT+EBqwwAGwm4jQmmyGF/g3Y3pi+MLU2U9UCjKUwCga/BUmAT8CiDIAnRfCyI8LxSNCeABgh1uro+zWlq7YQ9v++WXe7GWDziu/bcS0+AQGvr8EgD/aK7uaswjePgAAAABJRU5ErkJggg==
 // @run-at      document-end
 // @author      https://github.com/webdevsk
 // @description Removes Sponsored and Suggested posts from Facebook mobile chromium/react version
 // @license     MIT
+// @grant       GM_addStyle
+// @downloadURL https://update.greasyfork.org/scripts/479868/FB%20Mobile%20-%20Clean%20my%20feeds.user.js
+// @updateURL https://update.greasyfork.org/scripts/479868/FB%20Mobile%20-%20Clean%20my%20feeds.meta.js
 // ==/UserScript==
 
 // Some Things to note here
@@ -32,37 +35,82 @@ if (!document.documentElement.classList.contains("ssr")) return
 const root = document.querySelector('#screen-root')
 if (!root) return
 
-//Show counter on top
-if (devMode) {
-    var whiteCount = 0
-    var blackCount = 0
+////////////////////////////////////////////////////////////////////////////////
+////////////////////                   Classes           ////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
-    const devPanel = document.createElement("div")
-    Object.assign(devPanel.style, {
-        position: "fixed",
-        top: 0,
-        right: 0,
-        padding: ".5rem 1rem",
-        background: "#323436",
-        borderRadius: ".2rem",
-        display: "flex",
-        flexFlow: "row wrap",
-        zIndex: 99,
-        color: "#ddd",
-        gap: ".5rem",
-        fontSize: ".8rem",
-        pointerEvents: "none",
-    })
-    const whiteList = document.createElement("p")
-    whiteList.innerHTML = `Whitelisted: <span id="whitelist-count">0</span>`
-    const blackList = document.createElement("p")
-    blackList.innerHTML = `Blacklisted: <span id="blacklist-count">0</span>`
+class Spinner {
+    constructor() {
+        this.elm = document.createElement("div")
+        this.elm.id = "block-counter"
+        Object.assign(this.elm.style, { position: "fixed", top: "20px", left: "16px", pointerEvents: "none", zIndex: 100 })
+        this.elm.innerHTML = `<div class="spinner small animated"></div>`
+        document.body.appendChild(this.elm)
+    }
 
-    devPanel.appendChild(whiteList)
-    devPanel.appendChild(blackList)
-    document.body.appendChild(devPanel)
+    show() {
+        this.elm.style.display = "block"
+    }
+
+    hide() {
+        this.elm.style.display = "none"
+    }
 }
 
+class BlockCounter {
+    whitelisted = 0
+    blacklisted = 0
+
+    constructor() {
+        if (!devMode) return
+        this.elm = document.createElement("div")
+        document.body.appendChild(this.elm)
+        Object.assign(this.elm.style, { position: "fixed", top: 0, right: 0, padding: ".5rem 1rem", background: "#323436", borderRadius: ".2rem", display: "flex", flexFlow: "row wrap", zIndex: 99, color: "#ddd", gap: ".5rem", fontSize: ".8rem", pointerEvents: "none", })
+        this.render()
+    }
+
+    render() {
+        if (devMode) this.elm.innerHTML = `
+            <p>Whitelisted: ${this.whitelisted}</p>
+            <p>Blacklisted: ${this.blacklisted}</p>
+        `
+    }
+
+    increaseWhite() {
+        this.whitelisted += 1
+        this.render()
+    }
+
+    increaseBlack() {
+        this.blacklisted += 1
+        this.render()
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////                  Initials          ////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+// Show counter on top
+const counter = new BlockCounter()
+
+// Show spinner while operating
+const spinner = new Spinner()
+
+// Auto reloads app when idle for 15 minutes
+// This is to simulatate to ensure latest data when user comes back to his phone after a while
+autoReloadAfterIdle()
+
+
+// Some other styles
+GM_addStyle(`
+
+    /* remove install app toast */
+    div[data-comp-id~="22222"]:has( img[src*="MpdfZ1mwXmC.png"]){
+      display: none !important;
+    }
+
+`)
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////                   Labels           ////////////////////////
@@ -72,7 +120,7 @@ if (devMode) {
 // navigator.langs contain all of your preset languages. So we need to loop through it
 const getLabels = obj => navigator.languages.map(lang => obj[lang]).flat()
 
-console.log(navigator.languages)
+if (devMode) console.log("navigator.languages", navigator.languages)
 // Placeholder Message
 const placeholderMsg = getLabels({
     'en-US': 'Removed',
@@ -105,6 +153,7 @@ const unCategorized = getLabels({
 
 //Whatever we wanna do with the convicts
 findConvicts((convicts) => {
+
     console.table(convicts)
     for (const { element, reason, author } of convicts) {
         element.tabIndex = "-1"
@@ -170,7 +219,6 @@ findConvicts((convicts) => {
 
 })
 
-// autoReloadAfterIdle()
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////         function definitions       ////////////////////////
@@ -179,6 +227,8 @@ findConvicts((convicts) => {
 function findConvicts(callback) {
     const observer = new MutationObserver((mutationList, observer) => {
         if (location.pathname !== '/') return
+        if (devMode) console.time()
+        spinner.show()
         const convicts = []
 
         for (const mutation of mutationList) {
@@ -225,17 +275,18 @@ function findConvicts(callback) {
                         id: element.dataset.trackingDurationId,
                         author
                     })
-                    updateBlackCount(1)
+                    counter.increaseBlack()
                 } else {
-                    updateWhiteCount(1)
+                    counter.increaseWhite()
                 }
 
             }
         }
 
-        if (!convicts.length) return
+        if (!!convicts.length) callback(convicts)
 
-        callback(convicts)
+        if (devMode) console.timeEnd()
+        spinner.hide()
         // Set new calculated height to the bottom ".filler" element
         // We need to calculate it after all the convicts are taken care of
         // *** It seems we dont need it anymore. Completely hiding "Sponsored" posts fixed it for us
@@ -249,33 +300,20 @@ function findConvicts(callback) {
 }
 
 // setFillerHeight is omitted
-function setFillerHeight(mutationList) {
-    const fillerNode = document.querySelectorAll('.filler')[1]
-    if (!fillerNode) return
-    let newHeight = 0
-    for (const mutation of mutationList) {
-        if (!(mutation.type === "childList" && mutation.target.matches("[data-type='vscroller']") && mutation.addedNodes.length !== 0)) continue
+// function setFillerHeight(mutationList) {
+//     const fillerNode = document.querySelectorAll('.filler')[1]
+//     if (!fillerNode) return
+//     let newHeight = 0
+//     for (const mutation of mutationList) {
+//         if (!(mutation.type === "childList" && mutation.target.matches("[data-type='vscroller']") && mutation.addedNodes.length !== 0)) continue
 
-        newHeight += [...mutation.addedNodes].reduce((accumulator, element) => (
-            accumulator += element.classList.contains('displayed') || element.classList.contains('filler') ? 0 : element.clientHeight
-        ), 0)
-    }
-    fillerNode.style.height = newHeight
-}
+//         newHeight += [...mutation.addedNodes].reduce((accumulator, element) => (
+//             accumulator += element.classList.contains('displayed') || element.classList.contains('filler') ? 0 : element.clientHeight
+//         ), 0)
+//     }
+//     fillerNode.style.height = newHeight
+// }
 
-
-function updateWhiteCount(amount) {
-    if (!devMode) return
-    whiteCount += amount
-    document.querySelector('#whitelist-count').innerHTML = whiteCount
-}
-
-
-function updateBlackCount(amount) {
-    if (!devMode) return
-    blackCount += amount
-    document.querySelector('#blacklist-count').innerHTML = blackCount
-}
 
 function autoReloadAfterIdle(minutes = 15) {
     let leaveTime
@@ -290,4 +328,6 @@ function autoReloadAfterIdle(minutes = 15) {
         }
     })
 }
+
+
 
