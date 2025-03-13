@@ -4,13 +4,14 @@
 // @match       https://m.facebook.com/*
 // @match       https://www.facebook.com/*
 // @match       https://touch.facebook.com/*
-// @version     0.42
+// @version     0.43-dev
 // @icon        data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAAbwAAAG8B8aLcQwAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAHZSURBVDiNnZFLSFRxFMa/c1/jjIzYpGEjxFQUCC5a9BKJIAtRzEXEFaJFZXRrIQMtk3a1lWo3iwqkTS0kZyGCA4VNFNEmWwU9MIoiscZp7jzuvf9zWogXogS9Z3fO4fv4feeQiCBKjY8M9Nca3lUtkhqAUnwNoPcUheC63b+z5qm3nmelIxGwkMMir+/MzJSNzYodZ7/ZolKXADoDAJsmSJXahpXiXxPThdlIBlCSFUh+rd1wBNvuttLu1sOGae7zYjy4Nt8QgXpoXbzf9/HVYNfi3O+KK5XP5V3rEti2rde3pHvyuVtFAMB8/JjWJLlEU0M7nlnE0e1fjGVqPgVg4b8E0rHnHoSeDY1mx/CCUiIyiVZdQ8YE7bVgdpCWCqrj6xIQ0Rtm/qlB3okXywHoDJcxAnWa0OPtpb8M8nPP06V6tVD3/Mqj2zcOApjA0/g5AU6HYl7llcAANP4WHnH6SfEQ65hPJuJdvh8cuDs165y8nO1bqiZb4KoyVhhYVoDLqxEDAwT+EBqwwAGwm4jQmmyGF/g3Y3pi+MLU2U9UCjKUwCga/BUmAT8CiDIAnRfCyI8LxSNCeABgh1uro+zWlq7YQ9v++WXe7GWDziu/bcS0+AQGvr8EgD/aK7uaswjePgAAAABJRU5ErkJggg==
 // @run-at      document-end
 // @author      https://github.com/webdevsk
 // @description Removes Sponsored and Suggested posts from Facebook mobile chromium/react version
 // @license     MIT
 // @grant       GM_addStyle
+// @grant       GM_addElement
 // @downloadURL https://update.greasyfork.org/scripts/479868/FB%20Mobile%20-%20Clean%20my%20feeds.user.js
 // @updateURL https://update.greasyfork.org/scripts/479868/FB%20Mobile%20-%20Clean%20my%20feeds.meta.js
 // ==/UserScript==
@@ -25,6 +26,7 @@
 // As the posts get removed, the filler elements height need to be adjusted as well. Thats where the jitter happens.
 // As filler height goes from say 5000px to 500px in a second when we update it ourselves.
 // After scrolling for a while, they just keep spamming suggested posts and ads. So you will often see the "Loading more posts" element.
+
 
 const devMode = false
 const showPlaceholder = true
@@ -109,6 +111,8 @@ const spinner = new Spinner()
 // This is to simulatate to ensure latest data when user comes back to his phone after a while
 autoReloadAfterIdle()
 
+//Turn it into a fullscreen app when added as a shortcut to Home Screen
+fullScreenPWA()
 
 // Some other styles
 GM_addStyle(`
@@ -288,7 +292,7 @@ function findConvicts(callback) {
         // Set new calculated height to the bottom ".filler" element
         // We need to calculate it after all the convicts are taken care of
         // *** It seems we dont need it anymore. Completely hiding "Sponsored" posts fixed it for us
-        // setFillerHeight(mutationList)
+        setFillerHeight(mutationList)
     })
 
     observer.observe(root, {
@@ -298,19 +302,19 @@ function findConvicts(callback) {
 }
 
 // setFillerHeight is omitted
-// function setFillerHeight(mutationList) {
-//     const fillerNode = document.querySelectorAll('.filler')[1]
-//     if (!fillerNode) return
-//     let newHeight = 0
-//     for (const mutation of mutationList) {
-//         if (!(mutation.type === "childList" && mutation.target.matches("[data-type='vscroller']") && mutation.addedNodes.length !== 0)) continue
+function setFillerHeight(mutationList) {
+    const fillerNode = document.querySelector('.filler:last-child')
+    if (!fillerNode) return
+    let newHeight = 0
+    for (const mutation of mutationList) {
+        if (!(mutation.type === "childList" && mutation.target.matches("[data-type='vscroller']") && mutation.addedNodes.length !== 0)) continue
 
-//         newHeight += [...mutation.addedNodes].reduce((accumulator, element) => (
-//             accumulator += element.classList.contains('displayed') || element.classList.contains('filler') ? 0 : element.clientHeight
-//         ), 0)
-//     }
-//     fillerNode.style.height = newHeight
-// }
+        newHeight += [...mutation.addedNodes].reduce((accumulator, element) => (
+            accumulator += element.classList.contains('displayed') || element.classList.contains('filler') ? 0 : element.clientHeight
+        ), 0)
+    }
+    fillerNode.style.height = newHeight
+}
 
 
 function autoReloadAfterIdle(minutes = 15) {
@@ -325,6 +329,27 @@ function autoReloadAfterIdle(minutes = 15) {
             if (timeDiff > minutes) location.reload()
         }
     })
+}
+
+async function fullScreenPWA() {
+    const manifestNode = document.querySelector('link[rel="manifest"]')
+    console.log(manifestNode)
+
+    const manifestRaw = await fetch(manifestNode.href)
+    const manifest = await manifestRaw.json()
+
+    Object.assign(manifest, {
+        "start_url": location.origin + "/?ref=homescreenpwa",
+        "display": "standalone",
+        "background_color": "#000000",
+        "theme_color": "#242526",
+    })
+
+    const blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' })
+    const manifestURL = URL.createObjectURL(blob)
+    manifestNode.remove()
+    GM_addElement(document.head, "link", { rel: "manifest", href: manifestURL, class: "test" })
+    // manifestNode.setAttribute("href", manifestURL)
 }
 
 
