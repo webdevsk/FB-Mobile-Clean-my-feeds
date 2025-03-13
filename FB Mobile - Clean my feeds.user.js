@@ -3,7 +3,8 @@
 // @namespace   Violentmonkey Scripts
 // @match       https://m.facebook.com/*
 // @match       https://www.facebook.com/*
-// @version     0.41
+// @match       https://touch.facebook.com/*
+// @version     0.42
 // @icon        data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAAbwAAAG8B8aLcQwAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAHZSURBVDiNnZFLSFRxFMa/c1/jjIzYpGEjxFQUCC5a9BKJIAtRzEXEFaJFZXRrIQMtk3a1lWo3iwqkTS0kZyGCA4VNFNEmWwU9MIoiscZp7jzuvf9zWogXogS9Z3fO4fv4feeQiCBKjY8M9Nca3lUtkhqAUnwNoPcUheC63b+z5qm3nmelIxGwkMMir+/MzJSNzYodZ7/ZolKXADoDAJsmSJXahpXiXxPThdlIBlCSFUh+rd1wBNvuttLu1sOGae7zYjy4Nt8QgXpoXbzf9/HVYNfi3O+KK5XP5V3rEti2rde3pHvyuVtFAMB8/JjWJLlEU0M7nlnE0e1fjGVqPgVg4b8E0rHnHoSeDY1mx/CCUiIyiVZdQ8YE7bVgdpCWCqrj6xIQ0Rtm/qlB3okXywHoDJcxAnWa0OPtpb8M8nPP06V6tVD3/Mqj2zcOApjA0/g5AU6HYl7llcAANP4WHnH6SfEQ65hPJuJdvh8cuDs165y8nO1bqiZb4KoyVhhYVoDLqxEDAwT+EBqwwAGwm4jQmmyGF/g3Y3pi+MLU2U9UCjKUwCga/BUmAT8CiDIAnRfCyI8LxSNCeABgh1uro+zWlq7YQ9v++WXe7GWDziu/bcS0+AQGvr8EgD/aK7uaswjePgAAAABJRU5ErkJggg==
 // @run-at      document-end
 // @author      https://github.com/webdevsk
@@ -30,11 +31,17 @@ const showPlaceholder = true
 
 
 // Make sure this is the React-Mobile version of facebook
-if (!document.documentElement.classList.contains("ssr")) return
+if (document.body.id !== "app-body") {
+    console.error("ID 'app-body' not found.")
+    return
+}
 
 // React root
 const root = document.querySelector('#screen-root')
-if (!root) return
+if (!root) {
+    console.error("screen-root not found")
+    return
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////                   Classes           ////////////////////////
@@ -107,7 +114,7 @@ autoReloadAfterIdle()
 GM_addStyle(`
 
     /* remove install app toast */
-    div[data-comp-id~="22222"]:has( img[src*="MpdfZ1mwXmC.png"]){
+    div[data-comp-id~="22222"]:has([data-action-id~="32764"]){
       display: none !important;
     }
 
@@ -245,27 +252,17 @@ function findConvicts(callback) {
                 let raw
                 let author
 
-                for (const span of element.querySelectorAll("span.f5")) {
-                    if (![...suggested, ...sponsored].some(str => span.textContent.includes(str))) continue
+                for (const span of element.querySelectorAll("span.f2:not(.a), span.f5")) {
+                    if (![...suggested, ...sponsored, ...unCategorized].some(str => span.textContent.includes(str))) continue
                     suspect = true
                     reason = span.innerHTML.split("󰞋")[0]
                     raw = span.innerHTML
                     break
                 }
 
-                if (!suspect) {
-                    const span = element.querySelector("span.f2:not(.a)")
-
-                    if (span && unCategorized.some(str => span.textContent === str)) {
-                        suspect = true
-                        reason = span.textContent
-                        raw = span.textContent
-                    }
-                }
-
                 if (suspect) {
                     author = element.querySelector("span.f2").innerHTML
-                    if (author.includes("Sponsored")) console.log(element)
+                    if (author.includes("Sponsored")) console.log("Author contains Sponsored", element)
                 }
 
                 if (suspect) {
