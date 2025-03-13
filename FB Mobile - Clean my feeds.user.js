@@ -124,40 +124,17 @@ GM_addStyle(`
 ////////////////////                   Labels           ////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-// this version of fb does not update navigator.lang on language change
-// navigator.langs contain all of your preset languages. So we need to loop through it
-const getLabels = obj => navigator.languages.map(lang => obj[lang]).flat()
-
-if (devMode) console.log("navigator.languages", navigator.languages)
 // Placeholder Message
-const placeholderMsg = getLabels({
-    'en-US': 'Removed',
-    'en': 'Removed',
-    'bn': 'বাতিল'
-})[0]
-// To be fixed later
+const placeholderMsg = 'Removed'
 
 // Suggested
-const suggested = getLabels({
-    'en-US': 'Suggested',
-    'en': 'Suggested',
-    'bn': 'আপনার জন্য প্রস্তাবিত'
-})
+const suggested = ['Suggested', 'আপনার জন্য প্রস্তাবিত']
 
 // Sponsored
-const sponsored = getLabels({
-    'en-US': 'Sponsored',
-    'en': 'Sponsored',
-    'bn': 'স্পনসর্ড'
-})
+const sponsored = ['Sponsored', 'স্পনসর্ড']
+
 // Uncategorized
-const unCategorized = getLabels({
-    'en-US': ['Join', 'Follow'],
-    'en': ['Join', 'Follow'],
-    'bn': ['ফলো করুন', 'যোগ দিন']
-})
-
-
+const unCategorized = ['Join', 'Follow', 'ফলো করুন', 'যোগ দিন']
 
 //Whatever we wanna do with the convicts
 findConvicts((convicts) => {
