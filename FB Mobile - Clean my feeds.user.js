@@ -150,6 +150,7 @@ const sponsored = getLabels({
     'en': 'Sponsored',
     'bn': 'স্পনসর্ড'
 })
+
 // Uncategorized
 const unCategorized = getLabels({
     'en-US': ['Join', 'Follow'],
@@ -157,7 +158,25 @@ const unCategorized = getLabels({
     'bn': ['ফলো করুন', 'যোগ দিন']
 })
 
+// People you may know
+const peopleYouMayKnow = getLabels({
+    'en-US': 'People You May Know',
+    'en': 'People You May Know',
+})
 
+// Reels
+const reels = getLabels({
+    'en-US': 'Reels',
+    'en': 'Reels',
+})
+
+const allIgnoredGroups = [
+  ...suggested,
+  ...sponsored,
+  ...unCategorized,
+  ...peopleYouMayKnow,
+  ...reels,
+];
 
 //Whatever we wanna do with the convicts
 findConvicts((convicts) => {
@@ -252,8 +271,8 @@ function findConvicts(callback) {
                 let raw
                 let author
 
-                for (const span of element.querySelectorAll("span.f2:not(.a), span.f5")) {
-                    if (![...suggested, ...sponsored, ...unCategorized].some(str => span.textContent.includes(str))) continue
+                for (const span of element.querySelectorAll("span.f2:not(.a), span.f5, [style^='margin-top:9px; height:21px'] > .native-text")) {
+                    if (![...allIgnoredGroups].some(str => span.textContent.includes(str))) continue
                     suspect = true
                     reason = span.innerHTML.split("󰞋")[0]
                     raw = span.innerHTML
