@@ -111,14 +111,36 @@ autoReloadAfterIdle()
 
 
 // Some other styles
-GM_addStyle(`
+// GM_addStyle(`
 
-    /* remove install app toast */
-    div[data-comp-id~="22222"]:has([data-action-id~="32764"]){
-      display: none !important;
-    }
+//     /* remove install app toast */
+//     div[data-comp-id~="22222"]:has([data-action-id~="32764"]){
+//       display: none !important;
+//     }
 
-`)
+// `)
+
+// New Stuff
+// Button to Feeds
+const fillerElm = document.querySelector('.filler');
+if (fillerElm) {
+  const arbitraryOffset = 138;
+  const leftPos = window.screen.width - arbitraryOffset;
+  fillerElm.insertAdjacentHTML('afterend',`
+    <div id="feedsBtn"
+         style="z-index: 1;position: absolute;left: ${leftPos}px; pointer-events: all;">
+      <div class="m bg-s4" style="margin-top:4px; height:35px; z-index:0; width:35px; margin-left:5px; --diameter:35px;">
+        <img src="https://static.xx.fbcdn.net/rsrc.php/v4/yB/r/Bc4BAjXDBat.png" class="img contain" style="filter: grayscale(1);">
+      </div>
+    </div>`);
+
+  document.getElementById('feedsBtn').addEventListener('click', function() {
+    document.querySelector('[aria-label="Facebook Menu"]').click();
+    window.setTimeout(function() {
+      document.querySelector('[aria-label="Feeds"]').click();
+    }, 500);
+  });
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////                   Labels           ////////////////////////
