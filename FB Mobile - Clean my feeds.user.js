@@ -123,7 +123,9 @@ autoReloadAfterIdle()
 // New Stuff
 const tryAddFeedsButton = () => {
     const fillerElm = document.querySelector('.filler');
-    if (fillerElm && !document.getElementById('feedsBtn')) {
+    // TODO: Ensure localized
+    const alreadyOnFeedsScreen = document.querySelector("#screen-root .fixed-container.top .f2")?.innerText == 'Feeds';
+    if (fillerElm && !document.getElementById('feedsBtn') && !alreadyOnFeedsScreen) {
         const arbitraryOffset = 138;
         const leftPos = window.screen.width - arbitraryOffset;
         fillerElm.insertAdjacentHTML('afterend', `
