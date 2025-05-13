@@ -125,7 +125,7 @@ const tryAddFeedsButton = () => {
     const fillerElm = document.querySelector('.filler');
     // TODO: Ensure localized
     const innerScreenText = document.querySelector("#screen-root .fixed-container.top .f2")?.innerText || '';
-    const onInnerScreen = ['Feeds', 'Replies'].includes(innerScreenText);
+    const onInnerScreen = ['Feeds', 'Replies', 'Review posts and tags'].includes(innerScreenText);
     if (fillerElm && !document.getElementById('feedsBtn') && !onInnerScreen) {
         const arbitraryOffset = 138;
         const leftPos = window.screen.width - arbitraryOffset;
