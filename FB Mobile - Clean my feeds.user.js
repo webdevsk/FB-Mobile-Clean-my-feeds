@@ -128,7 +128,7 @@ const tryAddFeedsButton = () => {
     // This is really flakey, and it keeps failing
     // TODO: Rewrite as an inclusion instead of excluding everything in the world
     // FB is still largely an SPA and pushes to history infrequently
-    const onInnerScreen = ['Feeds', 'Replies', 'Review posts and tags', 'People who reacted', 'Messages'].includes(innerScreenText);
+    const onInnerScreen = ['Feeds', 'Replies', 'Review posts and tags', 'People who reacted', 'Edit Post', 'Privacy'].includes(innerScreenText);
     if (fillerElm && !document.getElementById('feedsBtn') && !onInnerScreen) {
         const arbitraryOffset = 138;
         const leftPos = window.screen.width - arbitraryOffset;
