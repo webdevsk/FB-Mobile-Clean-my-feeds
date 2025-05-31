@@ -138,175 +138,17 @@ const spinner = new Spinner();
 // This is to simulatate to ensure latest data when user comes back to his phone after a while
 autoReloadAfterIdle();
 
-function generateTile({ heading, subHeading = '', iconChar = '', checkbox = true }) {
-  const generatedId = heading
-    .toLowerCase()
-    .replace(/(?:^\w|[A-Z]|\b\w)/g, (word, index) => (index === 0 ? word.toLowerCase() : word.toUpperCase()))
-    .replace(/\s+/g, '');
-
-  return `
-    <div id="${generatedId}Tile" class="m" style="margin-top:-1px; height:53px; z-index:0;">
-      <div class="m" style="margin-top:11px; height:32px; z-index:0; width:32px; margin-left:4px;">
-        <div class="fl ac">
-          <div class="native-text" style="width:32px; color:#e4e6eb;"><span class="f3">${iconChar}</span>
-          </div>
-        </div>
-      </div>
-      <div class="m" style="margin-top:-35px; height:21px; z-index:0; margin-left:40px; pointer-events: none;">
-        <div class="native-text" style="color:#e4e6eb;">${heading}</div>
-      </div>
-      <div class="m" style="height:16px; z-index:0; margin-left:40px; pointer-events: none;">
-        <div style="color:#b0b3b8;"><span class="f5">${subHeading}</span></div>
-      </div>
-      ${
-        checkbox
-          ? `<div class="m" style="margin-top:-22px; height:20px; z-index:0; width:20px; margin-left: 90%; pointer-events: none;">
-                <input type="checkbox" style="height: 100%; width: 100%;" id="${generatedId}Checkbox" ${
-              userPrefObj[generatedId] === 'blocked' ? 'checked="true"' : ''
-            } />
-            </div>`
-          : ''
-      }
-    </div>`;
-}
-
-const settingsOverlay = `
-<div id="settingsOverlay" class="dialog-screen"
-  style="min-height:100vh; width:${window.screen.width}px; background-color:rgba(0,0,0,0.49803922);">
-  <div class="m fixed-container bottom"
-    style="height:${(Object.keys(allGroups).length + 1) * 60}px; z-index:1; margin-top:0; width:${
-  window.screen.width
-}px;">
-    <div class="m">
-        <div class="m bg-s2">
-          <div class="m nb"
-            style="margin-top:12px; z-index:0; clip-path:inset(0 0 0 0 round 8px); --nbrad:8px; --nbr:0px; margin-left:8px; --nbc:#242526; --nbt:8px; --nbb:0px; width:${
-              window.screen.width - 18
-            }px; --nbl:0px;">
-            <div class="m bg-s3"
-              style="margin-top:3px; z-index:0; margin-left:-1px;">
-              ${[
-                {
-                  heading: 'Suggested',
-                  subHeading: 'Removes un-needed algorithm suggested posts',
-                  iconChar: bookmarkIcon,
-                },
-                {
-                  heading: 'Sponsored',
-                  subHeading: 'Removes annoying ads',
-                  iconChar: minusIcon,
-                },
-                {
-                  heading: 'Reels',
-                  subHeading: 'Removes annoying short videos',
-                  iconChar: reelsIcon,
-                },
-                {
-                  heading: 'People You May Know',
-                  subHeading: 'Removes suggested friends',
-                  iconChar: peopleIcon,
-                },
-                {
-                  heading: 'Uncategorized',
-                  subHeading: 'Removes suggested pages with join/follow link',
-                  iconChar: plusIcon,
-                },
-              ]
-                .map(generateTile)
-                .join('')}
-            </div>
-          </div>
-          <div class="m nb"
-            style="margin-top:12px; height:322px; z-index:0; clip-path:inset(0 0 0 0 round 8px); --nbrad:8px; --nbr:0px; margin-left:8px; --nbc:#242526; --nbt:8px; --nbb:0px; width:${
-              window.screen.width - 18
-            }px; --nbl:0px;">
-            <div class="m bg-s3"
-              style="margin-top:3px; z-index:0; margin-left:-1px;">
-              ${[
-                {
-                  heading: 'Close Menu',
-                  iconChar: closeIcon,
-                  checkbox: false,
-                },
-              ]
-                .map(generateTile)
-                .join('')}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>`;
-
-function tryAddButtons() {
-  const fillerElm = document.querySelector('.filler');
-  const innerScreenText = document.querySelector('#screen-root .fixed-container.top .f2')?.innerText || '';
-  const onInnerScreen = innerScreenText !== '';
-  if (fillerElm && !onInnerScreen) {
-    if (!document.getElementById('settingsBtn')) {
-      fillerElm.insertAdjacentHTML(
-        'afterend',
-        `
-          <div id="settingsBtn" style="z-index: 1;position: absolute;left: ${
-            window.screen.width - 138
-          }px; pointer-events: all;">
-              <div class="m bg-s4" style="margin-top:4px; height:35px; z-index:0; width:35px; margin-left:5px; --diameter:35px;">
-                  <img src="https://static.xx.fbcdn.net/rsrc.php/v4/yC/r/FgGUIEUfnev.png" class="img contain" style="filter: grayscale(1);">
-              </div>
-          </div>`
-      );
-
-      document.getElementById('settingsBtn').addEventListener('click', e => {
-        document.body.innerHTML += settingsOverlay;
-
-        allGroups.forEach(groupName => {
-          document.getElementById(`${groupName}Tile`).addEventListener('click', ({ target }) => {
-            if (groupName === 'closeMenu') return;
-            const curPrefs = JSON.parse(localStorage.getItem('FBCleanMyFeeds') || '{}');
-            curPrefs[groupName] = curPrefs[groupName] === 'blocked' ? 'allowed' : 'blocked';
-            localStorage.setItem('FBCleanMyFeeds', JSON.stringify(curPrefs));
-
-            const parent = target.parentElement.parentElement;
-            const checkboxEle = parent.querySelector(`#${groupName}Checkbox`);
-            if (checkboxEle.getAttribute('checked') === 'true') {
-              checkboxEle.removeAttribute('checked');
-              return;
-            }
-            checkboxEle.setAttribute('checked', 'true');
-          });
-        });
-
-        document.getElementById('closeMenuTile').addEventListener('click', () => {
-          document.querySelector('#settingsOverlay')?.remove();
-          window.location.reload();
-        });
-      });
-    }
-
-    if (!document.getElementById('feedsBtn')) {
-      fillerElm.insertAdjacentHTML(
-        'afterend',
-        `
-          <div id="feedsBtn" style="z-index: 1;position: absolute;left: ${
-            window.screen.width - 180
-          }px; pointer-events: all;">
-              <div class="m bg-s4" style="margin-top:4px; height:35px; z-index:0; width:35px; margin-left:5px; --diameter:35px;">
-                  <img src="https://static.xx.fbcdn.net/rsrc.php/v4/yB/r/Bc4BAjXDBat.png" class="img contain" style="filter: grayscale(1);">
-              </div>
-          </div>`
-      );
-
-      document.getElementById('feedsBtn').addEventListener('click', () => {
-        document.querySelector('[aria-label="Facebook Menu"]').click();
-        window.setTimeout(() => document.querySelector('[aria-label="Feeds"]').click(), 500);
-      });
-    }
-  }
-}
-
 // Run initially if on "/"
 if (location.pathname === '/') {
-  tryAddButtons();
+  root.style.overflow = 'visible';
+  const titleBarEle = root.querySelector('.filler').nextElementSibling;
+
+  const tabBarEle = titleBarEle.nextElementSibling;
+  tabBarEle.style.position = 'sticky';
+  tabBarEle.style.zIndex = 1;
+  tabBarEle.style.top = '0';
+
+  tryAddButtons(titleBarEle);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -366,9 +208,11 @@ const groupLabels = {
   reels,
 };
 
-const allIgnoredGroups = allGroups.map(group => (userPrefObj[group] === 'blocked' ? groupLabels[group] : [])).flat();
+const allIgnoredGroups = [
+  ...new Set(allGroups.flatMap(group => (userPrefObj[group] === 'blocked' ? groupLabels[group] : [])).filter(d => d)),
+];
 
-//Whatever we wanna do with the convicts
+// Whatever we wanna do with the convicts
 runObserver(convicts => {
   console.table(convicts);
   for (const { element, reason, author } of convicts) {
@@ -513,4 +357,169 @@ function autoReloadAfterIdle(minutes = 15) {
       if (timeDiff > minutes) location.reload();
     }
   });
+}
+
+function generateSettingsTile({ heading, subHeading = '', iconChar = '', checkbox = true }) {
+  const generatedId = heading
+    .toLowerCase()
+    .replace(/(?:^\w|[A-Z]|\b\w)/g, (word, index) => (index === 0 ? word.toLowerCase() : word.toUpperCase()))
+    .replace(/\s+/g, '');
+
+  return `
+    <div id="${generatedId}Tile" class="m" style="margin-top:-1px; height:53px; z-index:0;">
+      <div class="m" style="margin-top:11px; height:32px; z-index:0; width:32px; margin-left:4px;">
+        <div class="fl ac">
+          <div class="native-text" style="width:32px; color:#e4e6eb;"><span class="f3">${iconChar}</span>
+          </div>
+        </div>
+      </div>
+      <div class="m" style="margin-top:-35px; height:21px; z-index:0; margin-left:40px; pointer-events: none;">
+        <div class="native-text" style="color:#e4e6eb;">${heading}</div>
+      </div>
+      <div class="m" style="height:16px; z-index:0; margin-left:40px; pointer-events: none;">
+        <div style="color:#b0b3b8;"><span class="f5">${subHeading}</span></div>
+      </div>
+      ${
+        checkbox
+          ? `<div class="m" style="margin-top:-22px; height:20px; z-index:0; width:20px; margin-left: 90%; pointer-events: none;">
+                <input type="checkbox" style="height: 100%; width: 100%;" id="${generatedId}Checkbox" ${
+              userPrefObj[generatedId] === 'blocked' ? 'checked="true"' : ''
+            } />
+            </div>`
+          : ''
+      }
+    </div>`;
+}
+
+const generateSettingsOverlay = () => `
+<div id="settingsOverlay" class="dialog-screen"
+  style="min-height:100vh; width:${window.screen.width}px; background-color:rgba(0,0,0,0.49803922);">
+  <div class="m fixed-container bottom"
+    style="height:${(Object.keys(allGroups).length + 1) * 60}px; z-index:1; margin-top:0; width:${
+  window.screen.width
+}px;">
+    <div class="m">
+        <div class="m bg-s2">
+          <div class="m nb"
+            style="margin-top:12px; z-index:0; clip-path:inset(0 0 0 0 round 8px); --nbrad:8px; --nbr:0px; margin-left:8px; --nbc:#242526; --nbt:8px; --nbb:0px; width:${
+              window.screen.width - 18
+            }px; --nbl:0px;">
+            <div class="m bg-s3"
+              style="margin-top:3px; z-index:0; margin-left:-1px;">
+              ${[
+                {
+                  heading: 'Suggested',
+                  subHeading: 'Removes un-needed algorithm suggested posts',
+                  iconChar: bookmarkIcon,
+                },
+                {
+                  heading: 'Sponsored',
+                  subHeading: 'Removes annoying ads',
+                  iconChar: minusIcon,
+                },
+                {
+                  heading: 'Reels',
+                  subHeading: 'Removes annoying short videos',
+                  iconChar: reelsIcon,
+                },
+                {
+                  heading: 'People You May Know',
+                  subHeading: 'Removes suggested friends',
+                  iconChar: peopleIcon,
+                },
+                {
+                  heading: 'Uncategorized',
+                  subHeading: 'Removes suggested pages with join/follow link',
+                  iconChar: plusIcon,
+                },
+              ]
+                .map(generateSettingsTile)
+                .join('')}
+            </div>
+          </div>
+          <div class="m nb"
+            style="margin-top:12px; height:322px; z-index:0; clip-path:inset(0 0 0 0 round 8px); --nbrad:8px; --nbr:0px; margin-left:8px; --nbc:#242526; --nbt:8px; --nbb:0px; width:${
+              window.screen.width - 18
+            }px; --nbl:0px;">
+            <div class="m bg-s3"
+              style="margin-top:3px; z-index:0; margin-left:-1px;">
+              ${[
+                {
+                  heading: 'Close Menu',
+                  iconChar: closeIcon,
+                  checkbox: false,
+                },
+              ]
+                .map(generateSettingsTile)
+                .join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+
+function tryAddButtons(titleBarEle) {
+  const innerScreenText = document.querySelector('#screen-root .fixed-container.top .f2')?.innerText || '';
+  const onInnerScreen = innerScreenText !== '';
+  if (titleBarEle && !onInnerScreen) {
+    if (!document.getElementById('settingsBtn')) {
+      titleBarEle.insertAdjacentHTML(
+        'afterend',
+        `
+          <div id="settingsBtn" style="z-index: 2; position: absolute; left: ${
+            window.screen.width - 138
+          }px; pointer-events: all;">
+              <div class="m bg-s4" style="margin-top:4px; height:35px; z-index:0; width:35px; margin-left:5px; --diameter:35px;">
+                  <img src="https://static.xx.fbcdn.net/rsrc.php/v4/yC/r/FgGUIEUfnev.png" class="img contain" style="filter: grayscale(1);">
+              </div>
+          </div>`
+      );
+
+      document.getElementById('settingsBtn').addEventListener('click', e => {
+        document.body.innerHTML += generateSettingsOverlay();
+
+        allGroups.forEach(groupName => {
+          document.getElementById(`${groupName}Tile`).addEventListener('click', ({ target }) => {
+            if (groupName === 'closeMenu') return;
+            const curPrefs = JSON.parse(localStorage.getItem('FBCleanMyFeeds') || '{}');
+            curPrefs[groupName] = curPrefs[groupName] === 'blocked' ? 'allowed' : 'blocked';
+            localStorage.setItem('FBCleanMyFeeds', JSON.stringify(curPrefs));
+
+            const parent = target.parentElement.parentElement;
+            const checkboxEle = parent.querySelector(`#${groupName}Checkbox`);
+            if (checkboxEle.getAttribute('checked') === 'true') {
+              checkboxEle.removeAttribute('checked');
+              return;
+            }
+            checkboxEle.setAttribute('checked', 'true');
+          });
+        });
+
+        document.getElementById('closeMenuTile').addEventListener('click', () => {
+          document.querySelector('#settingsOverlay')?.remove();
+          window.location.reload();
+        });
+      });
+    }
+
+    if (!document.getElementById('feedsBtn')) {
+      titleBarEle.insertAdjacentHTML(
+        'afterend',
+        `
+          <div id="feedsBtn" style="z-index: 2; position: absolute; left: ${
+            window.screen.width - 180
+          }px; pointer-events: all;">
+              <div class="m bg-s4" style="margin-top:4px; height:35px; z-index:0; width:35px; margin-left:5px; --diameter:35px;">
+                  <img src="https://static.xx.fbcdn.net/rsrc.php/v4/yB/r/Bc4BAjXDBat.png" class="img contain" style="filter: grayscale(1);">
+              </div>
+          </div>`
+      );
+
+      document.getElementById('feedsBtn').addEventListener('click', () => {
+        document.querySelector('[aria-label="Facebook Menu"]').click();
+        window.setTimeout(() => document.querySelector('[aria-label="Feeds"]').click(), 500);
+      });
+    }
+  }
 }
