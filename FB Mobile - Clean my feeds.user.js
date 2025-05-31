@@ -140,15 +140,7 @@ autoReloadAfterIdle();
 
 // Run initially if on "/"
 if (location.pathname === '/') {
-  root.style.overflow = 'visible';
-  const titleBarEle = root.querySelector('.filler').nextElementSibling;
-
-  const tabBarEle = titleBarEle.nextElementSibling;
-  tabBarEle.style.position = 'sticky';
-  tabBarEle.style.zIndex = 1;
-  tabBarEle.style.top = '0';
-
-  tryAddButtons(titleBarEle);
+  tryAddButtons();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -208,7 +200,7 @@ const groupLabels = {
   reels,
 };
 
-const allIgnoredGroups = [
+const blockedGroups = [
   ...new Set(allGroups.flatMap(group => (userPrefObj[group] === 'blocked' ? groupLabels[group] : [])).filter(d => d)),
 ];
 
@@ -306,7 +298,7 @@ function runObserver(callback) {
         for (const span of element.querySelectorAll(
           "span.f2:not(.a), span.f5, [style^='margin-top:9px; height:21px'] > .native-text"
         )) {
-          if (![...allIgnoredGroups].some(str => span.textContent.includes(str))) continue;
+          if (![...blockedGroups].some(str => span.textContent.includes(str))) continue;
           suspect = true;
           reason = span.innerHTML.split('󰞋')[0];
           raw = span.innerHTML;
@@ -459,7 +451,15 @@ const generateSettingsOverlay = () => `
     </div>
   </div>`;
 
-function tryAddButtons(titleBarEle) {
+function tryAddButtons() {
+  root.style.overflow = 'visible';
+  const titleBarEle = root.querySelector('.filler').nextElementSibling;
+
+  const tabBarEle = document.querySelector('[role="tablist"]');
+  tabBarEle.style.position = 'sticky';
+  tabBarEle.style.zIndex = 1;
+  tabBarEle.style.top = '0';
+
   const innerScreenText = document.querySelector('#screen-root .fixed-container.top .f2')?.innerText || '';
   const onInnerScreen = innerScreenText !== '';
   if (titleBarEle && !onInnerScreen) {
