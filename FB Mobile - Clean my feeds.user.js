@@ -4,7 +4,7 @@
 // @match       https://m.facebook.com/*
 // @match       https://www.facebook.com/*
 // @match       https://touch.facebook.com/*
-// @version     0.42
+// @version     0.43beta
 // @icon        data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAAbwAAAG8B8aLcQwAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAHZSURBVDiNnZFLSFRxFMa/c1/jjIzYpGEjxFQUCC5a9BKJIAtRzEXEFaJFZXRrIQMtk3a1lWo3iwqkTS0kZyGCA4VNFNEmWwU9MIoiscZp7jzuvf9zWogXogS9Z3fO4fv4feeQiCBKjY8M9Nca3lUtkhqAUnwNoPcUheC63b+z5qm3nmelIxGwkMMir+/MzJSNzYodZ7/ZolKXADoDAJsmSJXahpXiXxPThdlIBlCSFUh+rd1wBNvuttLu1sOGae7zYjy4Nt8QgXpoXbzf9/HVYNfi3O+KK5XP5V3rEti2rde3pHvyuVtFAMB8/JjWJLlEU0M7nlnE0e1fjGVqPgVg4b8E0rHnHoSeDY1mx/CCUiIyiVZdQ8YE7bVgdpCWCqrj6xIQ0Rtm/qlB3okXywHoDJcxAnWa0OPtpb8M8nPP06V6tVD3/Mqj2zcOApjA0/g5AU6HYl7llcAANP4WHnH6SfEQ65hPJuJdvh8cuDs165y8nO1bqiZb4KoyVhhYVoDLqxEDAwT+EBqwwAGwm4jQmmyGF/g3Y3pi+MLU2U9UCjKUwCga/BUmAT8CiDIAnRfCyI8LxSNCeABgh1uro+zWlq7YQ9v++WXe7GWDziu/bcS0+AQGvr8EgD/aK7uaswjePgAAAABJRU5ErkJggg==
 // @run-at      document-end
 // @author      https://github.com/webdevsk
@@ -26,22 +26,40 @@
 // As filler height goes from say 5000px to 500px in a second when we update it ourselves.
 // After scrolling for a while, they just keep spamming suggested posts and ads. So you will often see the "Loading more posts" element.
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////                   Global Vars           ////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+var counter
+var spinner
+var root
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////                   Settings           ////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 const devMode = false
 const showPlaceholder = true
 
 
-// Make sure this is the React-Mobile version of facebook
-if (document.body.id !== "app-body") {
-    console.error("ID 'app-body' not found.")
-    return
-}
+////////////////////////////////////////////////////////////////////////////////
+////////////////////                   Keywords           ////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
-// React root
-const root = document.querySelector('#screen-root')
-if (!root) {
-    console.error("screen-root not found")
-    return
-}
+// Placeholder Message
+const placeholderMsg = 'Removed'
+
+// Suggested
+const suggested = ['Suggested', 'আপনার জন্য প্রস্তাবিত']
+
+// Sponsored
+const sponsored = ['Sponsored', 'স্পনসর্ড']
+
+// Uncategorized
+const unCategorized = ['Join', 'Follow', 'ফলো করুন', 'যোগ দিন']
+
+const blockKeywords = [...suggested, ...sponsored, ...unCategorized]
+
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////                   Classes           ////////////////////////
@@ -96,48 +114,48 @@ class BlockCounter {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-////////////////////                  Initials          ////////////////////////
+/////////////                Function Definitions          /////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-// Show counter on top
-const counter = new BlockCounter()
+function init() {
 
-// Show spinner while operating
-const spinner = new Spinner()
+    // Show counter on top
+    counter = new BlockCounter()
 
-// Auto reloads app when idle for 15 minutes
-// This is to simulatate to ensure latest data when user comes back to his phone after a while
-autoReloadAfterIdle()
+    // Show spinner while operating
+    spinner = new Spinner()
+
+    // Auto reloads app when idle for 15 minutes
+    // This is to simulatate to ensure latest data when user comes back to his phone after a while
+    registerAutoReloadAfterIdle()
 
 
-// Some other styles
-GM_addStyle(`
+    // Some other styles
+    GM_addStyle(`
 
-    /* remove install app toast */
-    div[data-comp-id~="22222"]:has([data-action-id~="32764"]){
-      display: none !important;
+        /* remove install app toast */
+        div[data-comp-id~="22222"]:has([data-action-id~="32764"]){
+            display: none !important;
+            }
+            
+        `)
+
+    findConvicts(callbackFn)
+}
+
+function investigate(element) {
+    if (!(element.hasAttribute("data-tracking-duration-id"))) return { isSuspect: false }
+
+    for (const span of element.querySelectorAll("span.f2:not(.a), span.f5")) {
+        if (!blockKeywords.some(str => span.innerText.includes(str))) continue
+        return { isSuspect: true, reason: span.innerHTML.split("󰞋")[0], raw: span.innerHTML }
     }
+    return { isSuspect: false }
+}
 
-`)
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////                   Labels           ////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-// Placeholder Message
-const placeholderMsg = 'Removed'
-
-// Suggested
-const suggested = ['Suggested', 'আপনার জন্য প্রস্তাবিত']
-
-// Sponsored
-const sponsored = ['Sponsored', 'স্পনসর্ড']
-
-// Uncategorized
-const unCategorized = ['Join', 'Follow', 'ফলো করুন', 'যোগ দিন']
 
 //Whatever we wanna do with the convicts
-findConvicts((convicts) => {
+function callbackFn(convicts) {
 
     console.table(convicts)
     for (const { element, reason, author } of convicts) {
@@ -201,48 +219,48 @@ findConvicts((convicts) => {
             image.dataset.nulled = true
         }
     }
+}
 
-})
-
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////         function definitions       ////////////////////////
-////////////////////////////////////////////////////////////////////////////////
 
 function findConvicts(callback) {
+    // Check initial posts
+    const initialPosts = document.querySelectorAll("[data-tracking-duration-id]")
+    for (const element of initialPosts) {
+        const { isSuspect, reason, raw } = investigate(element)
+        if (isSuspect) {
+            author = element.querySelector("span.f2").innerHTML
+            if (author.includes("Sponsored")) console.log("Author contains Sponsored", element)
+            callback([{
+                element,
+                reason,
+                raw,
+                id: element.dataset.trackingDurationId,
+                author
+            }])
+        }
+    }
+
     const observer = new MutationObserver((mutationList, observer) => {
-        if (location.pathname !== '/') return
+        // if (location.pathname !== '/') return
         if (devMode) console.time()
         spinner.show()
         const convicts = []
 
         for (const mutation of mutationList) {
             if (!(mutation.type === "childList" && mutation.target.matches("[data-type='vscroller']") && mutation.addedNodes.length !== 0)) continue
+            console.log("Mutation", mutation.addedNodes)
             // console.log(mutation)
             // console.table([...mutation.addedNodes].map(item => ({elm:item ,id: item.dataset.trackingDurationId, height: item.dataset.actualHeight})))
             for (const element of mutation.addedNodes) {
                 // Check if element is an actual facebook post
-                if (!(element.hasAttribute("data-tracking-duration-id"))) continue
+                const { isSuspect, reason, raw } = investigate(element)
 
-                let suspect = false
-                let reason
-                let raw
-                let author
-
-                for (const span of element.querySelectorAll("span.f2:not(.a), span.f5")) {
-                    if (![...suggested, ...sponsored, ...unCategorized].some(str => span.textContent.includes(str))) continue
-                    suspect = true
-                    reason = span.innerHTML.split("󰞋")[0]
-                    raw = span.innerHTML
-                    break
-                }
-
-                if (suspect) {
+                if (isSuspect) {
                     author = element.querySelector("span.f2").innerHTML
                     if (author.includes("Sponsored")) console.log("Author contains Sponsored", element)
                 }
 
-                if (suspect) {
+                if (isSuspect) {
                     convicts.push({
                         element,
                         reason,
@@ -290,7 +308,7 @@ function findConvicts(callback) {
 // }
 
 
-function autoReloadAfterIdle(minutes = 15) {
+function registerAutoReloadAfterIdle(minutes = 15) {
     let leaveTime
 
     document.addEventListener('visibilitychange', () => {
@@ -306,3 +324,21 @@ function autoReloadAfterIdle(minutes = 15) {
 
 
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////         Execution       ////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+
+// Make sure this is the React-Mobile version of facebook
+if (document.body.id !== "app-body") {
+    console.error("ID 'app-body' not found.")
+    return
+}
+
+new MutationObserver((_, observer) => {
+    root = document.querySelector('#screen-root')
+    console.log(root)
+    if (!root) return
+    observer.disconnect()
+    init()
+}).observe(document.body, { childList: true })
