@@ -1,0 +1,139 @@
+.dialog-screen {
+	position: fixed;
+	inset: 0;
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-end;
+	background-color: rgba(0, 0, 0, 0.49803922);
+}
+.settings-container {
+	position: relative;
+	padding-inline: 0.5rem;
+	padding-block: 2rem;
+}
+.settingsItem {
+	display: grid;
+	min-height: 2.5rem;
+	gap: 0.75rem;
+	align-items: center;
+	padding: 0.5rem;
+	grid-template-columns: max-content minmax(0, 1fr) max-content;
+}
+.settingsItem * {
+	pointer-events: none;
+}
+.settingsIcon {
+	font-size: 1.5rem;
+}
+.bg-fallback::before {
+	position: absolute;
+	content: "";
+	width: 100%;
+	height: 100%;
+	top: 0;
+	left: 0;
+	background-color: rgba(240, 242, 245, 1);
+	z-index: -1;
+}
+
+.icon-bg-fallback::before {
+	position: absolute;
+	content: "";
+	background-color: rgba(255, 255, 255, 0.10196078431372549);
+	border-radius: 50%;
+	left: calc((100% - var(--diameter)) / 2);
+	top: calc((100% - var(--diameter)) / 2);
+	width: var(--diameter);
+	height: var(--diameter);
+	z-index: -1;
+}
+
+.settingsLabel {
+	display: block;
+	font-size: 1rem;
+	font-weight: 600;
+}
+
+.settingsDescription {
+	display: block;
+	white-space: nowrap;
+	width: 100%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.fb-check {
+	display: inline-flex;
+	align-items: center;
+	cursor: pointer;
+	font-family: sans-serif;
+	user-select: none;
+	vertical-align: middle;
+}
+
+.fb-check input {
+	display: none;
+}
+
+.fb-check .checkmark {
+	width: 18px;
+	height: 18px;
+	border: 2px solid currentColor;
+	border-radius: 3px;
+	position: relative;
+	transition: background-color 0.2s ease;
+}
+
+.fb-check input:checked + .checkmark {
+	background-color: #1877f2;
+}
+
+.fb-check input:checked + .checkmark::after {
+	content: "";
+	position: absolute;
+	left: 4px;
+	top: 0px;
+	width: 5px;
+	height: 10px;
+	border: solid white;
+	border-width: 0 2px 2px 0;
+	transform: rotate(45deg);
+}
+
+.customBtns {
+	width: 45px;
+	height: 43px;
+	z-index: 2;
+	position: absolute;
+	pointer-events: all !important;
+}
+
+.customBtns#settingsBtn {
+	left: calc(100dvw - 138px);
+}
+
+.customBtns#feedsBtn {
+	left: calc(100dvw - 180px);
+}
+
+.customBtns > div {
+	margin-top: 4px;
+	height: 35px;
+	z-index: 0;
+	width: 35px;
+	margin-left: 5px;
+	--diameter: 35px;
+	position: relative;
+	position: relative;
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+	flex-shrink: 0;
+}
+
+.customBtns img {
+	filter: grayscale(1);
+	object-fit: contain;
+	position: absolute;
+	width: 100%;
+	height: 100%;
+}

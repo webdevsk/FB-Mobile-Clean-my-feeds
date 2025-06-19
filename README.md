@@ -2,7 +2,7 @@
 
 <div align="center">
     <a href="https://www.flaticon.com/free-icon/cleaning_573848?term=sweep&page=1&position=2&origin=search&related_id=573848">
-        <img width="100" height="100" src="./logo.png" alt="sweeper logo"/>
+        <img width="100" height="100" src="./src/logo.png" alt="sweeper logo"/>
     </a>
 
 <h2 align="center">FB Mobile - Clean my feeds (UserScript)</h2>
