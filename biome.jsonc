@@ -28,7 +28,7 @@
 			"quoteStyle": "double",
 			"semicolons": "asNeeded",
 			"arrowParentheses": "asNeeded",
-			"trailingCommas": "all",
+			"trailingCommas": "es5",
 			"bracketSameLine": true
 		},
 		"globals": []

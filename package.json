@@ -26,7 +26,7 @@
     "build:dev": "bun build.ts --dev",
     "build:watch": "bun build.ts --dev --watch",
     "build:workflow": "bun build.ts --release-channel GitHubRelease",
-    "build:greasyfork": "bun build.ts --dev --release-channel OutOfBand",
+    "build:greasyfork": "bun build.ts --release-channel OutOfBand",
     "clean": "rimraf ./dist/",
     "dev": "bun build.ts --dev --server --watch"
   },
@@ -44,7 +44,9 @@
     "@grant": [
       "GM_getValue",
       "GM_setValue",
-      "GM_addStyle"
+      "GM_addStyle",
+      "GM_addValueChangeListener",
+      "GM_removeValueChangeListener"
     ],
     "@run-at": "document-end",
     "@downloadURL": "https://update.greasyfork.org/scripts/479868/FB%20Mobile%20-%20Clean%20my%20feeds.user.js",

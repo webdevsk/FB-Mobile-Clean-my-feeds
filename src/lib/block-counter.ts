@@ -54,7 +54,7 @@ export class BlockCounter {
 			Object.assign(this.elm.style, {
 				position: "fixed",
 				top: "0",
-				right: "0",
+				left: "0",
 				padding: ".5rem 1rem",
 				background: "#323436",
 				borderRadius: ".2rem",

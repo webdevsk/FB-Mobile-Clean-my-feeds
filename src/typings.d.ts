@@ -74,11 +74,11 @@ declare global {
 	 */
 	declare function GM_getValue<T extends JSONSerializable>(
 		key: string,
-		defaultValue: T,
+		defaultValue: T
 	): JSONSerializable
 	declare function GM_getValue<T extends JSONSerializable>(
 		key?: null,
-		defaultValue: T,
+		defaultValue: T
 	): T
 	declare function GM_getValue(key?: string): unknown
 	declare function GM_getValue(): undefined
@@ -149,17 +149,41 @@ declare global {
 	 */
 	declare function GM_addElement<K extends keyof HTMLElementTagNameMap>(
 		tagName: K,
-		attributes?: Record<string, string>,
+		attributes?: Record<string, string>
 	): HTMLElementTagNameMap[K]
 
 	declare function GM_addElement<K extends keyof HTMLElementTagNameMap>(
 		parentNode: Node | Element | ShadowRoot,
 		tagName: K,
-		attributes?: Record<string, string>,
+		attributes?: Record<string, string>
 	): HTMLElementTagNameMap[K]
 
 	/**Makes a request like XMLHttpRequest, with some special capabilities, not restricted by same-origin policy. */
 	declare function GM_xmlhttpRequest(details: GMxmlhttpRequestObject): {
 		abort: () => void
 	}
+
+	/** 
+	 * Adds a change listener to the storage and returns the listener ID.
+	 * The name of the observed variable
+	 * @param name - string
+	 * 
+	 * The old value of the observed variable (undefined if it was created)
+	 * @param oldValue - any
+ 
+	 * The new value of the observed variable (undefined if it was deleted)
+	 * @param newValue - any
+ 
+	 * true if modified by the userscript instance of another tab or false for this script instance. Can be used by scripts of different browser tabs to communicate with each other.
+	 * @param remote - boolean
+	*/
+	declare function GM_addValueChangeListener<T = unknown>(
+		name: string,
+		callback: (name: string, oldValue: T, newValue: T, remote: boolean) => void
+	): string
+
+	/** Removes a change listener by its ID.
+	 * @param listenerId - string
+	 */
+	declare function GM_removeValueChangeListener(listenerId: string): void
 }

@@ -1,3 +1,4 @@
+import { showPlaceholder, theme } from "@/config"
 import { filtersDatabase } from "@/data/filters-database"
 import { keywordsPerLanguage } from "@/data/keywords-per-language"
 import { getOwnLangFilters } from "./get-own-language-filters"
@@ -11,13 +12,12 @@ export const purgeElement = ({
 	reason: string
 	author: string
 }) => {
-	const showPlaceholder = true
 	const sponsoredFilters = getOwnLangFilters(
-		filtersDatabase.sponsored.keywordsDB,
+		filtersDatabase.sponsored.keywordsDB
 	)
 	const placeHolderMessage = getOwnLangFilters(
-		keywordsPerLanguage.placeholderMessage,
-	)
+		keywordsPerLanguage.placeholderMessage
+	)[0]
 	element.tabIndex = -1
 	element.dataset.purged = "true"
 
@@ -25,35 +25,19 @@ export const purgeElement = ({
 	// Having placeholder inside them results in a  scroll jump
 	if (showPlaceholder && !sponsoredFilters.includes(reason)) {
 		element.dataset.actualHeight = "32"
-		Object.assign(element.style, {
-			height: "32px",
-			overflowY: "hidden",
-			pointerEvents: "none",
-			position: "relative",
-		})
+		element.classList.add(theme.bgClassName)
+		element.style.height = "2rem"
 
-		const overlay = document.createElement("div")
-		Object.assign(overlay.style, {
-			position: "absolute",
-			inset: 0,
-			background: "#242526",
-			color: "#e4e6eb",
-			display: "grid",
-			pointerEvents: "auto",
-			placeItems: "center",
-			paddingInline: ".5rem",
-		})
-		overlay.innerHTML = `<p style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap; width: 100%; text-align: center;">${placeHolderMessage}: ${author} (${reason})</p>`
+		const overlay = document.createElement("article")
+		overlay.className = "placeholder"
+		overlay.innerHTML = `<p style="color: ${theme.textColor}">${placeHolderMessage}: ${author} (${reason})</p>`
 		element.appendChild(overlay)
 	} else {
 		// Hide elements by resizing to 0px
 		// Removing from DOM or display:none causes issues loading newer posts
 		element.dataset.actualHeight = "0"
-		Object.assign(element.style, {
-			height: "0px",
-			overflowY: "hidden",
-			pointerEvents: "none",
-		})
+		element.dataset.forceHide = "true"
+		element.style.height = "0rem"
 
 		//Hiding divider element preceding convicted element
 		const { previousElementSibling: prevElm } = element

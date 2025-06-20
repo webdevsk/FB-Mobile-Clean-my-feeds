@@ -1,6 +1,6 @@
+import { pathnameMatches, rootSelector } from "@/config"
 import { createLocationWatcher } from "@/utils/location-change.event"
 import { watchForSelectors } from "@/utils/watch-for-selectors"
-import { pathnameMatches, rootSelector } from ".."
 
 type CallbackWithCleanupFn = () => () => void
 
@@ -13,7 +13,7 @@ export const onReadyForScripting = (
 	 * Callback function to be called when ready. Should return a Cleanup function.
 	 * @returns Cleanup function
 	 */
-	cb: CallbackWithCleanupFn,
+	cb: CallbackWithCleanupFn
 ): void => {
 	// registers "spa:locationchange" event
 	createLocationWatcher().run()
@@ -26,7 +26,7 @@ export const onReadyForScripting = (
 			() => {
 				cleanupFn = cb()
 			},
-			{ signal: ctrl.signal },
+			{ signal: ctrl.signal }
 		)
 	}
 

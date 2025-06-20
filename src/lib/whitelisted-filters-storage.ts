@@ -1,3 +1,5 @@
+import { devMode } from "@/config"
+
 /**
  * Manages whitelisted filters storage. Stores in userscript manager storage.
  */
@@ -6,6 +8,7 @@ export class WhitelistedFiltersStorage {
 	 * The storage key for the whitelisted filters.
 	 */
 	storageKey: string = "whitelisted-filters"
+	listenerId: string | null = null
 	/**
 	 * The default value for the whitelisted filters.
 	 */
@@ -19,9 +22,6 @@ export class WhitelistedFiltersStorage {
 	 */
 	static instance: WhitelistedFiltersStorage | null = null
 
-	private constructor() {
-		this.cache = this.fetch()
-	}
 	/**
 	 * Gets the singleton instance of WhitelistedFiltersStorage.
 	 * Creates a new instance if one doesn't exist.
@@ -35,15 +35,19 @@ export class WhitelistedFiltersStorage {
 		return WhitelistedFiltersStorage.instance
 	}
 
-	private fetch(): string[] {
-		const untrustedValue = GM_getValue<string[]>(
-			this.storageKey,
-			this.defaultValue,
-		)
-		return Array.isArray(untrustedValue) &&
-			untrustedValue.every(val => typeof val === "string")
-			? untrustedValue
-			: this.defaultValue
+	public register(): () => void {
+		const initialValue = GM_getValue(this.storageKey, this.defaultValue)
+		this.update(initialValue)
+		return this.onChange()
+	}
+
+	private update(value: unknown): void {
+		if (Array.isArray(value) && value.every(val => typeof val === "string")) {
+			this.cache = value
+		} else {
+			this.cache = this.defaultValue
+			this.set(this.defaultValue)
+		}
 	}
 	/**
 	 * Gets the whitelisted filters from storage.
@@ -57,7 +61,21 @@ export class WhitelistedFiltersStorage {
 	 * @param {string[]} filters - The whitelisted filters to set
 	 */
 	public set(filters: string[]) {
+		if (devMode) console.log("Set new filters", filters)
 		GM_setValue(this.storageKey, filters)
-		this.cache = this.fetch()
+	}
+
+	public onChange(cb?: (newValue: string[]) => void): () => void {
+		this.listenerId = GM_addValueChangeListener(
+			this.storageKey,
+			(name, oldValue, newValue, remote) => {
+				if (devMode) console.log("New filter value", newValue)
+				this.update(newValue)
+				cb?.(this.get())
+			}
+		)
+		return () => {
+			if (this.listenerId) GM_removeValueChangeListener(this.listenerId)
+		}
 	}
 }

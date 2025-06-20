@@ -1,5 +1,5 @@
 import styleLoader from "bun-style-loader"
-import { watch as fswatch } from "fs"
+import { watch as fswatch, readFileSync } from "fs"
 import winston from "winston"
 import yargs from "yargs"
 import { hideBin } from "yargs/helpers"
@@ -188,11 +188,20 @@ async function build(option: BuildOption): Promise<BuildOutput> {
   const { dev = false, releaseChannel = "GitCommit" } = option
   const entrypoint = "./src/index.ts"
 
+  // Check if entrypoint has exports
+  const indexContent = readFileSync(entrypoint, 'utf-8');
+  const hasExports = /^export\s+/m.test(indexContent);
+
+  if (hasExports) {
+    console.error('❌ Error: index.ts should not contain exports. Move exports to separate files.');
+    process.exit(1);
+  }
+
   logger.info(`Building ${entrypoint}`)
   const build = await Bun.build({
     entrypoints: [entrypoint],
     outdir: "./dist",
-    minify: !dev,
+    minify: false,
     sourcemap: dev ? "inline" : undefined,
     loader: {
       ".html": "text",

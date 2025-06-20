@@ -1,4 +1,4 @@
-import { getCssClassWithIconBgInBefore } from ".."
+import { theme } from "@/config"
 
 type DestroyFunction = () => void
 
@@ -58,11 +58,11 @@ export class MenuButtonsInjector {
 	 */
 	private createButton(id: string, imgSrc: string): HTMLElement {
 		const button = document.createElement("div")
-		button.outerHTML = `
-			<div id="${id}" class="customBtns">
-				<div class="${getCssClassWithIconBgInBefore()}">
-					<img src="${imgSrc}">
-				</div>
+		button.id = id
+		button.className = "customBtns"
+		button.innerHTML = `
+			<div class="${theme.iconBgClassName}">
+				<img src="${imgSrc}">
 			</div>
 		`
 		return button
@@ -88,7 +88,7 @@ export class MenuButtonsInjector {
 		if (!document.getElementById("settingsBtn")) {
 			const settingsBtn = this.createButton(
 				"settingsBtn",
-				"https://static.xx.fbcdn.net/rsrc.php/v4/yC/r/FgGUIEUfnev.png",
+				"https://static.xx.fbcdn.net/rsrc.php/v4/yC/r/FgGUIEUfnev.png"
 			)
 			titleBarEle.after(settingsBtn)
 			this.buttonElements.push(settingsBtn)
@@ -98,7 +98,7 @@ export class MenuButtonsInjector {
 		if (!document.getElementById("feedsBtn")) {
 			const feedsBtn = this.createButton(
 				"feedsBtn",
-				"https://static.xx.fbcdn.net/rsrc.php/v4/yB/r/Bc4BAjXDBat.png",
+				"https://static.xx.fbcdn.net/rsrc.php/v4/yB/r/Bc4BAjXDBat.png"
 			)
 			titleBarEle.after(feedsBtn)
 			this.buttonElements.push(feedsBtn)
