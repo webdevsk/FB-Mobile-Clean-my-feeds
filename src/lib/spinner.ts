@@ -1,22 +1,103 @@
+/**
+ * A singleton class that manages a loading spinner UI element.
+ * The spinner is displayed in the top-left corner of the viewport and can be shown/hidden on demand.
+ * It's designed to indicate ongoing background operations to the user.
+ *
+ * @example
+ * // Get the spinner instance
+ * const spinner = Spinner.getInstance();
+ *
+ * // Register the spinner in the DOM
+ * const cleanup = spinner.register();
+ *
+ * // Show the spinner
+ * spinner.show();
+ *
+ * // Hide the spinner
+ * spinner.hide();
+ *
+ * // Clean up (remove from DOM)
+ * cleanup();
+ */
 export class Spinner {
-	elm: HTMLDivElement
-	constructor() {
-		this.elm = document.createElement("div")
-		this.elm.id = "block-counter"
-		Object.assign(this.elm.style, {
-			position: "fixed",
-			top: "20px",
-			left: "16px",
-			pointerEvents: "none",
-			zIndex: 100,
-		})
-		this.elm.innerHTML = `<div class="spinner small animated"></div>`
-		document.body.appendChild(this.elm)
+	private static instance: Spinner | null = null
+	private elm: HTMLDivElement | null = null
+	private isVisible = false
+
+	/**
+	 * Private constructor to enforce singleton pattern.
+	 * Use `Spinner.getInstance()` to get the instance.
+	 */
+	private constructor() {}
+
+	/**
+	 * Gets the singleton instance of the Spinner.
+	 * Creates a new instance if one doesn't exist.
+	 *
+	 * @returns {Spinner} The singleton Spinner instance
+	 */
+	public static getInstance(): Spinner {
+		if (!Spinner.instance) {
+			Spinner.instance = new Spinner()
+		}
+		return Spinner.instance
 	}
-	show() {
-		this.elm.style.display = "block"
+
+	/**
+	 * Registers the spinner in the DOM if not already present.
+	 * If the spinner is already registered but not in the DOM, it will be reattached.
+	 *
+	 * @returns {() => void} A cleanup function that removes the spinner from the DOM
+	 */
+	public register(): () => void {
+		if (!this.elm) {
+			this.elm = document.createElement("div")
+			this.elm.id = "block-counter"
+			Object.assign(this.elm.style, {
+				position: "fixed",
+				top: "20px",
+				left: "16px",
+				pointerEvents: "none",
+				zIndex: "100",
+				display: this.isVisible ? "block" : "none",
+			})
+			this.elm.innerHTML = `<div class="spinner small animated"></div>`
+			document.body.appendChild(this.elm)
+		} else if (!document.body.contains(this.elm)) {
+			document.body.appendChild(this.elm)
+		}
+		return () => this.destroy()
 	}
-	hide() {
-		this.elm.style.display = "none"
+
+	/**
+	 * Removes the spinner from the DOM.
+	 * The spinner instance and its state are preserved for potential reuse.
+	 */
+	public destroy(): void {
+		if (this.elm && document.body.contains(this.elm)) {
+			this.elm.remove()
+		}
+	}
+
+	/**
+	 * Shows the spinner if it's currently hidden.
+	 * The spinner will be displayed at the top-left corner of the viewport.
+	 */
+	public show(): void {
+		this.isVisible = true
+		if (this.elm) {
+			this.elm.style.display = "block"
+		}
+	}
+
+	/**
+	 * Hides the spinner if it's currently visible.
+	 * The spinner remains in the DOM but is not visible to the user.
+	 */
+	public hide(): void {
+		this.isVisible = false
+		if (this.elm) {
+			this.elm.style.display = "none"
+		}
 	}
 }

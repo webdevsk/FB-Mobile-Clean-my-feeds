@@ -4,8 +4,18 @@ import { pathnameMatches, rootSelector } from ".."
 
 type CallbackWithCleanupFn = () => () => void
 
-export const onReadyForScripting = (cb: CallbackWithCleanupFn) => {
-	// register "spa:locationchange" event
+/**
+ * Injects DOM listeners and location change listeners to determine if we are ready for scripting. Calls callback function when ready.
+ * @param cb - Callback function to be called when ready. Should return a Cleanup function.
+ */
+export const onReadyForScripting = (
+	/**
+	 * Callback function to be called when ready. Should return a Cleanup function.
+	 * @returns Cleanup function
+	 */
+	cb: CallbackWithCleanupFn,
+): void => {
+	// registers "spa:locationchange" event
 	createLocationWatcher().run()
 	let ctrl = new AbortController()
 	let cleanupFn: (() => void) | null = null

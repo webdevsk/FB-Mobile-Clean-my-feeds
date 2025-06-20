@@ -1,40 +1,112 @@
-import { devMode } from "../index"
-
+/**
+ * A singleton class that manages a counter display showing the number of whitelisted and blacklisted items.
+ * The counter is displayed in the top-right corner of the viewport and updates in real-time.
+ * It's designed to provide visual feedback about content filtering operations.
+ *
+ * @example
+ * // Get the BlockCounter instance
+ * const counter = BlockCounter.getInstance();
+ *
+ * // Register the counter in the DOM
+ * const cleanup = counter.register();
+ *
+ * // Increment counters
+ * counter.increaseWhite(); // Increments whitelisted count
+ * counter.increaseBlack(); // Increments blacklisted count
+ *
+ * // Clean up (remove from DOM)
+ * cleanup();
+ */
 export class BlockCounter {
-	elm: HTMLDivElement | null = null
-	whitelisted = 0
-	blacklisted = 0
+	private static instance: BlockCounter | null = null
+	private elm: HTMLDivElement | null = null
+	private whitelisted = 0
+	private blacklisted = 0
 
-	constructor() {
-		if (!devMode) return
-		this.elm = document.createElement("div")
-		document.body.appendChild(this.elm)
-		Object.assign(this.elm.style, {
-			position: "fixed",
-			top: 0,
-			right: 0,
-			padding: ".5rem 1rem",
-			background: "#323436",
-			borderRadius: ".2rem",
-			display: "flex",
-			flexFlow: "row wrap",
-			zIndex: 99,
-			color: "#ddd",
-			gap: ".5rem",
-			fontSize: ".8rem",
-			pointerEvents: "none",
-		})
+	/**
+	 * Private constructor to enforce singleton pattern.
+	 * Use `BlockCounter.getInstance()` to get the instance.
+	 */
+	private constructor() {}
+
+	/**
+	 * Gets the singleton instance of BlockCounter.
+	 * Creates a new instance if one doesn't exist.
+	 *
+	 * @returns {BlockCounter} The singleton BlockCounter instance
+	 */
+	public static getInstance(): BlockCounter {
+		if (!BlockCounter.instance) {
+			BlockCounter.instance = new BlockCounter()
+		}
+		return BlockCounter.instance
+	}
+
+	/**
+	 * Registers the counter in the DOM if not already present.
+	 * If the counter is already registered but not in the DOM, it will be reattached.
+	 *
+	 * @returns {() => void} A cleanup function that removes the counter from the DOM
+	 */
+	public register(): () => void {
+		if (!this.elm) {
+			this.elm = document.createElement("div")
+			Object.assign(this.elm.style, {
+				position: "fixed",
+				top: "0",
+				right: "0",
+				padding: ".5rem 1rem",
+				background: "#323436",
+				borderRadius: ".2rem",
+				display: "flex",
+				flexFlow: "row wrap",
+				zIndex: "99",
+				color: "#ddd",
+				gap: ".5rem",
+				fontSize: ".8rem",
+				pointerEvents: "none",
+			})
+			document.body.appendChild(this.elm)
+		} else if (!document.body.contains(this.elm)) {
+			document.body.appendChild(this.elm)
+		}
+
 		this.render()
+		return () => this.destroy()
 	}
-	render() {
-		if (devMode && this.elm)
+
+	/**
+	 * Updates the counter display with current whitelisted and blacklisted counts.
+	 * Called internally whenever the counts change.
+	 */
+	private render(): void {
+		if (this.elm) {
 			this.elm.innerHTML = `<p>Whitelisted: ${this.whitelisted}</p><p>Blacklisted: ${this.blacklisted}</p>`
+		}
 	}
-	increaseWhite() {
+
+	/**
+	 * Removes the counter from the DOM.
+	 * The counter instance and its counts are preserved for potential reuse.
+	 */
+	public destroy(): void {
+		if (this.elm && document.body.contains(this.elm)) {
+			this.elm.remove()
+		}
+	}
+
+	/**
+	 * Increments the whitelisted items counter and updates the display.
+	 */
+	public increaseWhite(): void {
 		this.whitelisted += 1
 		this.render()
 	}
-	increaseBlack() {
+
+	/**
+	 * Increments the blacklisted items counter and updates the display.
+	 */
+	public increaseBlack(): void {
 		this.blacklisted += 1
 		this.render()
 	}

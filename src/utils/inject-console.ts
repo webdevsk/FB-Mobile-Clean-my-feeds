@@ -7,7 +7,10 @@ const consoleMethodsThatDontBreakWhenArgumentIsString = [
 	"trace",
 ]
 
-/** Styles console.log and console.error prefixing the extension name */
+/**
+ * Styles console.log and console.error prefixing the extension name
+ * @param prefix - The prefix to be added to the console output
+ */
 export function injectConsole(prefix: string) {
 	const originalConsole = globalThis.console
 	globalThis.console = new Proxy(originalConsole, {
