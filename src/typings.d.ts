@@ -75,12 +75,12 @@ declare global {
 	declare function GM_getValue<T extends JSONSerializable>(
 		key: string,
 		defaultValue: T
-	): JSONSerializable
+	): T
 	declare function GM_getValue<T extends JSONSerializable>(
 		key?: null,
 		defaultValue: T
 	): T
-	declare function GM_getValue(key?: string): unknown
+	declare function GM_getValue<T extends JSONSerializable>(key?: string): T
 	declare function GM_getValue(): undefined
 
 	/**setValue
@@ -177,7 +177,7 @@ declare global {
 	 * true if modified by the userscript instance of another tab or false for this script instance. Can be used by scripts of different browser tabs to communicate with each other.
 	 * @param remote - boolean
 	*/
-	declare function GM_addValueChangeListener<T = unknown>(
+	declare function GM_addValueChangeListener<T extends JSONSerializable>(
 		name: string,
 		callback: (name: string, oldValue: T, newValue: T, remote: boolean) => void
 	): string
