@@ -54,15 +54,7 @@ export class Spinner {
 	public register(): () => void {
 		if (!this.elm) {
 			this.elm = document.createElement("div")
-			this.elm.id = "block-counter"
-			Object.assign(this.elm.style, {
-				position: "fixed",
-				top: "20px",
-				left: "16px",
-				pointerEvents: "none",
-				zIndex: "100",
-				display: this.isVisible ? "block" : "none",
-			})
+			this.elm.id = "spinner"
 			this.elm.innerHTML = `<div class="spinner small animated"></div>`
 			document.body.appendChild(this.elm)
 			if (devMode) console.log("Spinner register successful")

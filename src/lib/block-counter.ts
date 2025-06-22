@@ -53,21 +53,7 @@ export class BlockCounter {
 	public register(): () => void {
 		if (!this.elm) {
 			this.elm = document.createElement("div")
-			Object.assign(this.elm.style, {
-				position: "fixed",
-				top: "0",
-				left: "0",
-				padding: ".5rem 1rem",
-				background: "#323436",
-				borderRadius: ".2rem",
-				display: "flex",
-				flexFlow: "row wrap",
-				zIndex: "99",
-				color: "#ddd",
-				gap: ".5rem",
-				fontSize: ".8rem",
-				pointerEvents: "none",
-			})
+			this.elm.id = "block-counter"
 			document.body.appendChild(this.elm)
 			if (devMode) console.log("block counter register successful")
 		} else if (!document.body.contains(this.elm)) {

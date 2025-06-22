@@ -5,11 +5,26 @@
 	flex-direction: column;
 	justify-content: flex-end;
 	background-color: rgba(0, 0, 0, 0.49803922);
+	overflow-y: auto;
 }
+
 .settings-container {
+	/* for the bg class */
 	position: relative;
 	padding-inline: 0.5rem;
 	padding-block: 2rem;
+
+	.settings-header {
+		padding: 0.5rem 1rem;
+		margin-bottom: 1rem;
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		.settings-title {
+			font-size: 1.5rem;
+			font-weight: 600;
+		}
+	}
 
 	.settingsItem {
 		display: grid;
@@ -179,3 +194,31 @@ div[data-purged="true"] {
 [data-screen-id]:first-child [data-comp-id~="22222"] {
 	display: none !important;
 }
+
+#block-counter {
+	position: fixed;
+	top: 0;
+	left: 0;
+	padding: 0.5rem 1rem;
+	background: #323436;
+	border-radius: 0.2rem;
+	display: flex;
+	flex-wrap: wrap;
+	z-index: 99;
+	color: #ddd;
+	gap: 0.5rem;
+	font-size: 0.8rem;
+	pointer-events: none;
+}
+
+#spinner {
+	position: fixed;
+	top: 20px;
+	left: 16px;
+	pointer-events: none;
+	z-index: 100;
+}
+/* 
+.startup-marker{
+	margin-top: 100dvh;
+} */

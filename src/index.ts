@@ -1,5 +1,4 @@
 import { BlockCounter } from "@/lib/block-counter"
-import { Spinner } from "@/lib/spinner"
 import STYLES from "@/styles/style.css"
 import { bodyId, devMode, postContainerSelector, theme } from "./config"
 import { MenuButtonsInjector } from "./lib/menu-buttons-injector"
@@ -9,6 +8,7 @@ import { runFeedsCleaner } from "./lib/run-feeds-cleaner"
 import { SettingsMenuInjector } from "./lib/settings-menu-injector"
 import { WhitelistedFiltersStorage } from "./lib/whitelisted-filters-storage"
 import { watchForSelectors } from "./utils/watch-for-selectors"
+
 ;(() => {
 	// Make sure this is the React-Mobile version of facebook
 	if (document.body.id !== bodyId) {
@@ -26,13 +26,12 @@ import { watchForSelectors } from "./utils/watch-for-selectors"
 			updateThemeConfigWhenPossible(),
 			// Show counter on top
 			...(devMode ? [BlockCounter.getInstance().register()] : []),
-			// Show spinner while operating
-			Spinner.getInstance().register(),
 			WhitelistedFiltersStorage.getInstance().register(),
 			// Inject menu buttons [settings, feed]
 			MenuButtonsInjector.getInstance().inject(),
 			// Setup settingsMenu listeners and return cleanup function
 			SettingsMenuInjector.getInstance().inject(),
+			// Main cleaner
 			runFeedsCleaner(),
 			// Auto reload after idle
 			registerAutoReloadAfterIdle(),
@@ -40,7 +39,6 @@ import { watchForSelectors } from "./utils/watch-for-selectors"
 
 		return () => {
 			console.log("Not Ready for scripting")
-
 			// Cleanup code like removing dom nodes and destroying event listeners
 			aborts.forEach(abort => abort?.())
 			aborts.length = 0
@@ -48,8 +46,8 @@ import { watchForSelectors } from "./utils/watch-for-selectors"
 	})
 })()
 
-function updateThemeConfigWhenPossible() {
-	return watchForSelectors(
+const updateThemeConfigWhenPossible = () =>
+	watchForSelectors(
 		[
 			".native-text:last-child",
 			'[role="tablist"]>*:last-child .native-text',
@@ -83,4 +81,3 @@ function updateThemeConfigWhenPossible() {
 			target: document.querySelector(postContainerSelector)!,
 		}
 	)
-}

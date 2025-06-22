@@ -23,7 +23,12 @@ export class SettingsMenuInjector {
 	private generateSettingsOverlay(): string {
 		return `
 <div id="${this.overlayId}" class="dialog-screen" style="color: ${theme.textColor}">
-  <div class="settings-container ${theme.bgClassName}">
+<div class="settings-container ${theme.bgClassName}">
+<div class="settings-header">
+	<div class="settings-title">FB Mobile - Clean my feeds</div>
+	<div class="settings-description">Mark filters to hide posts</div>
+</div>
+<div class="settings-items">
       ${Object.entries(filtersDatabase)
 				.map(([filterType, item]) => {
 					return `
@@ -51,7 +56,7 @@ export class SettingsMenuInjector {
       </div>
     </div>`
 				)}
-  </div>
+</div>
 </div>
 `
 	}
