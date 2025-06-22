@@ -1,5 +1,10 @@
-import { devMode, possibleTargetsSelectorInPost, rootSelector } from "@/config"
+import {
+	devMode,
+	possibleTargetsSelectorInPost,
+	postContainerSelector,
+} from "@/config"
 import { filtersDatabase } from "@/data/filters-database"
+import { keywordsPerLanguage } from "@/data/keywords-per-language"
 import { BlockCounter } from "@/lib/block-counter"
 import { getOwnLangFilters } from "./get-own-language-filters"
 import { purgeElement } from "./purge-element"
@@ -11,7 +16,7 @@ export const runFeedsCleaner = (): (() => void) => {
 	// navigator.langs contain all of your preset languages. So we need to loop through it
 	if (devMode) console.log("navigator.languages", navigator.languages)
 
-	const root = document.querySelector<HTMLElement>(rootSelector)!
+	const root = document.querySelector<HTMLElement>(postContainerSelector)!
 	const whitelistedStorageInstance = WhitelistedFiltersStorage.getInstance()
 
 	const allFilters = Object.keys(filtersDatabase)
@@ -36,6 +41,13 @@ export const runFeedsCleaner = (): (() => void) => {
 	// Listen for changes
 	whitelistedStorageInstance.onChange(setActiveFilters)
 
+	const sponsoredFilters = getOwnLangFilters(
+		filtersDatabase.sponsored.keywordsDB
+	)
+	const placeHolderMessage = getOwnLangFilters(
+		keywordsPerLanguage.placeholderMessage
+	)[0]
+
 	const checkElement = (element: HTMLElement) => {
 		// Handled already
 		if (element.dataset.purged === "true") return
@@ -58,12 +70,13 @@ export const runFeedsCleaner = (): (() => void) => {
 			return
 		}
 		BlockCounter.getInstance().increaseBlack()
-		console.log("Active Filters: ", activeFilters)
 
 		purgeElement({
 			element,
 			reason: reason ?? raw ?? "",
 			author: element.querySelector("span.f2")?.innerHTML ?? "",
+			placeHolderMessage,
+			sponsoredFilters,
 		})
 	}
 
@@ -102,6 +115,7 @@ export const runFeedsCleaner = (): (() => void) => {
 	observer.observe(root, {
 		childList: true,
 	})
+
 	if (devMode)
 		console.log("Mutation observer setup for new posts done on", root)
 	return () => {

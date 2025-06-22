@@ -3,6 +3,9 @@
   "workspaces": {
     "": {
       "name": "fb-mobile-clean-my-feeds",
+      "dependencies": {
+        "typescript": "^5.8.3",
+      },
       "devDependencies": {
         "@biomejs/biome": "2.0.0",
         "@types/yargs": "^17.0.33",

@@ -41,9 +41,8 @@ export type WatchForSelectorOptions = {
 type AbortWatcher = typeof MutationObserver.prototype.disconnect
 
 /** Cleanup function */
-export type OnInvalidatedCallbackFn = () => void | PromiseLike<void>
 
-export type WatchForSelectorCallback = () => OnInvalidatedCallbackFn | void
+export type WatchForSelectorCallback = () => void | PromiseLike<void>
 
 /**
  * Watches for given selectors. Fires callback once all of them are found.
@@ -65,7 +64,7 @@ export function watchForSelectors(
 	selectors: readonly string[],
 	/** Callback to run when selectors are found */
 	callback: WatchForSelectorCallback,
-	options: WatchForSelectorOptions = {},
+	options: WatchForSelectorOptions = {}
 ): AbortWatcher {
 	// Input checks
 	if (!Array.isArray(selectors))
@@ -76,38 +75,36 @@ export function watchForSelectors(
 		throw new Error("watchForSelectors: Options must be an object")
 	if ("resolver" in options && typeof options.resolver !== "function")
 		throw new Error(
-			"watchForSelectors: Resolver must be a function that resolves to boolean",
+			"watchForSelectors: Resolver must be a function that resolves to boolean"
 		)
 
-	let onInvalidated: OnInvalidatedCallbackFn | undefined
 	// Main logic
 	const elements = selectors.map(selector =>
-		document.querySelector<Element>(selector),
+		document.querySelector<Element>(selector)
 	)
 	if (options.resolver?.(elements) ?? elements.every(elm => elm !== null)) {
-		onInvalidated = callback() || undefined
+		callback()
 		return () => null
 	}
 	const observer = new MutationObserver((_, observer) => {
 		const elements = selectors.map(selector =>
-			document.querySelector<Element>(selector),
+			document.querySelector<Element>(selector)
 		)
 		if (options.resolver?.(elements) ?? elements.every(elm => elm !== null)) {
 			observer.disconnect()
-			onInvalidated = callback() || undefined
+			callback()
 		}
 	})
 	observer.observe(
 		options.target ?? document,
-		options.observerOptions ?? { childList: true, subtree: true },
+		options.observerOptions ?? { childList: true, subtree: true }
 	)
 	options.signal?.addEventListener(
 		"abort",
 		() => {
 			observer.disconnect()
-			onInvalidated?.()
 		},
-		{ once: true },
+		{ once: true }
 	)
 	return observer.disconnect.bind(observer)
 }
@@ -124,12 +121,12 @@ export function watchForSelectors(
 export function watchForSelectorsPromise(
 	/** Selector to watch for */
 	selectors: readonly string[],
-	options: WatchForSelectorOptions = {},
+	options: WatchForSelectorOptions = {}
 ): Promise<void> {
 	return new Promise((resolve, reject) => {
 		watchForSelectors(selectors, resolve, options)
 		options.signal?.addEventListener("abort", () =>
-			reject(new Error("Aborted by signal")),
+			reject(new Error("Aborted by signal"))
 		)
 	})
 }

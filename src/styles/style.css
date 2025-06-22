@@ -39,6 +39,7 @@
 		}
 	}
 }
+
 .bg-fallback::before {
 	position: absolute;
 	content: "";
@@ -62,6 +63,7 @@
 	z-index: -1;
 }
 
+/* Modified checkboxes for settings screen */
 .fb-check {
 	display: inline-flex;
 	align-items: center;
@@ -138,7 +140,7 @@
 	}
 }
 
-[data-purged="true"] {
+div[data-purged="true"] {
 	height: 32px;
 	overflow-y: hidden;
 	pointer-events: none;
@@ -151,7 +153,8 @@
 	}
 
 	& > div {
-		opacity: 0;
+		/* opacity: 0; */
+		display: none !important;
 	}
 
 	.placeholder {
@@ -170,4 +173,9 @@
 			text-align: center;
 		}
 	}
+}
+
+/* Removes app install prompt */
+[data-screen-id]:first-child [data-comp-id~="22222"] {
+	display: none !important;
 }

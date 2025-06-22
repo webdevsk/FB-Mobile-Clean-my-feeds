@@ -38,6 +38,8 @@ export class WhitelistedFiltersStorage {
 	public register(): () => void {
 		const initialValue = GM_getValue(this.storageKey, this.defaultValue)
 		this.update(initialValue)
+		if (devMode) console.log("WhitelistedFiltersStorage register successful")
+
 		return this.onChange()
 	}
 
@@ -68,7 +70,7 @@ export class WhitelistedFiltersStorage {
 	public onChange(cb?: (newValue: string[]) => void): () => void {
 		this.listenerId = GM_addValueChangeListener(
 			this.storageKey,
-			(name, oldValue, newValue, remote) => {
+			(_name, _oldValue, newValue, _remote) => {
 				if (devMode) console.log("New filter value", newValue)
 				this.update(newValue)
 				cb?.(this.get())

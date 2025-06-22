@@ -1,23 +1,18 @@
 import { showPlaceholder, theme } from "@/config"
-import { filtersDatabase } from "@/data/filters-database"
-import { keywordsPerLanguage } from "@/data/keywords-per-language"
-import { getOwnLangFilters } from "./get-own-language-filters"
 
 export const purgeElement = ({
 	element,
 	reason,
 	author,
+	placeHolderMessage,
+	sponsoredFilters,
 }: {
 	element: HTMLElement
 	reason: string
 	author: string
+	placeHolderMessage: string
+	sponsoredFilters: string[]
 }) => {
-	const sponsoredFilters = getOwnLangFilters(
-		filtersDatabase.sponsored.keywordsDB
-	)
-	const placeHolderMessage = getOwnLangFilters(
-		keywordsPerLanguage.placeholderMessage
-	)[0]
 	element.tabIndex = -1
 	element.dataset.purged = "true"
 

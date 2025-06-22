@@ -207,6 +207,9 @@ async function build(option: BuildOption): Promise<BuildOutput> {
       ".html": "text",
     },
     plugins: [styleLoader()],
+    target: "browser",
+    format: "esm"
+
   })
 
   logger.info(Bun.inspect(build, { colors: true }))

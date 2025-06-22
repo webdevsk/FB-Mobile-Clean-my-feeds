@@ -1,55 +1,100 @@
-import { pathnameMatches, rootSelector } from "@/config"
-import { createLocationWatcher } from "@/utils/location-change.event"
-import { watchForSelectors } from "@/utils/watch-for-selectors"
+import {
+	devMode,
+	pathnameMatches,
+	postContainerSelector,
+	routeNodeSelector,
+	screenRootSelector,
+} from "@/config"
+import { watchForSelectorsPromise } from "@/utils/watch-for-selectors"
 
-type CallbackWithCleanupFn = () => () => void
+type CleanupFn = () => void | PromiseLike<void>
 
 /**
  * Injects DOM listeners and location change listeners to determine if we are ready for scripting. Calls callback function when ready.
  * @param cb - Callback function to be called when ready. Should return a Cleanup function.
  */
-export const onReadyForScripting = (
+export const onReadyForScripting = async (
 	/**
 	 * Callback function to be called when ready. Should return a Cleanup function.
 	 * @returns Cleanup function
 	 */
-	cb: CallbackWithCleanupFn
-): void => {
-	// registers "spa:locationchange" event
-	createLocationWatcher().run()
-	let ctrl = new AbortController()
-	let cleanupFn: (() => void) | null = null
+	cb: () => CleanupFn
+): Promise<void> => {
+	let cleanupFn: CleanupFn | null = null
 
-	const runWatcher = (cb: CallbackWithCleanupFn) => {
-		watchForSelectors(
-			[rootSelector],
-			() => {
-				cleanupFn = cb()
-			},
-			{ signal: ctrl.signal }
-		)
+	const main = () => {
+		if (devMode)
+			console.log("Main node found. Running cleanup function and restarting...")
+		cleanupFn?.()
+		cleanupFn = cb()
 	}
-
-	// 1. Check if current page matches initially
-	if (pathnameMatches.some(path => location.pathname === path)) {
-		runWatcher(cb)
-	}
-
-	// 2. Listen for location changes
-	window.addEventListener("spa:locationchange", () => {
-		if (pathnameMatches.some(path => location.pathname === path)) {
-			runWatcher(cb)
-		} else {
-			// 3. Cleanup if page doesn't match
-			// Stop watcher
-			ctrl.abort()
-
-			// Renew signal as an aborted one cannot be reinitialized
-			ctrl = new AbortController()
-			ctrl.signal.throwIfAborted()
-			// Cleanup functions such as DOM cleanup or stopping event listeners
+	// Wait for screen root to be present
+	await watchForSelectorsPromise([screenRootSelector])
+	onNavigation((routeNode: HTMLElement) => {
+		if (devMode) console.log("onNavigation callback called")
+		// Terminate if we are not on the main page
+		if (!pathnameMatches.some(pathname => pathname === location.pathname)) {
+			if (devMode) console.log("Not on main page. Terminating...")
+			return () => null
+		}
+		// Run main function if the target node is present
+		if (document.querySelector(postContainerSelector)) main()
+		// The target node is sometimes removed and added back. So we need to observe it
+		const observer = new MutationObserver(mutationList => {
+			if (devMode) console.log("Main node detector mutation detected")
+			for (const mutation of mutationList) {
+				for (const node of mutation.addedNodes) {
+					if (
+						node instanceof HTMLElement &&
+						node.nodeType === Node.ELEMENT_NODE &&
+						node.matches(postContainerSelector)
+					) {
+						main()
+					}
+				}
+			}
+		})
+		observer.observe(routeNode, {
+			childList: true,
+		})
+		// Return cleaup function to invoke when we are not on the main page
+		return () => {
 			cleanupFn?.()
 			cleanupFn = null
+			observer.disconnect()
 		}
+	})
+}
+
+/**
+ * Watches for navigation events. Calls callback function when navigation is detected.
+ * @param cb - Callback function to be called when navigation is detected. Should return a Cleanup function.
+ */
+const onNavigation = async (cb: (routeNode: HTMLElement) => CleanupFn) => {
+	let cleanupFn: CleanupFn | null = null
+	const screenRoot = document.querySelector(screenRootSelector)!
+
+	// routeNode is the element which is removed and added when we navigate through FB
+	const initialRouteNode = screenRoot.querySelector(routeNodeSelector)
+	if (initialRouteNode && initialRouteNode instanceof HTMLElement) {
+		cleanupFn = cb(initialRouteNode)
+	}
+	new MutationObserver(mutationList => {
+		if (devMode) console.log("Running navigation mutation")
+		for (const mutation of mutationList) {
+			for (const node of mutation.addedNodes) {
+				if (
+					node instanceof HTMLElement &&
+					node.nodeType === Node.ELEMENT_NODE &&
+					node.matches(routeNodeSelector)
+				) {
+					if (devMode) console.log("Navigation detected, ", node)
+					cleanupFn?.()
+					cleanupFn = cb(node)
+				}
+			}
+		}
+	}).observe(screenRoot, {
+		childList: true,
 	})
 }

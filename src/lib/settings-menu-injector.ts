@@ -1,4 +1,4 @@
-import { devMode, theme } from "@/config"
+import { devMode, screenRootSelector, theme } from "@/config"
 import { watchForSelectors } from "@/utils/watch-for-selectors"
 import { filtersDatabase } from "../data/filters-database"
 import { WhitelistedFiltersStorage } from "./whitelisted-filters-storage"
@@ -94,7 +94,10 @@ export class SettingsMenuInjector {
 						.querySelector<HTMLButtonElement>('[aria-label="Feeds"]')!
 						.click()
 				},
-				{ signal: this.ctrl.signal }
+				{
+					signal: this.ctrl.signal,
+					target: document.querySelector(screenRootSelector)!,
+				}
 			)
 		}
 	}
@@ -117,6 +120,7 @@ export class SettingsMenuInjector {
 		if (devMode) console.log("SettingsMenuInjector inject called")
 		this.ctrl = new AbortController()
 		this.setupEventListeners()
+		if (devMode) console.log("SettingsMenuInjector inject successful")
 		return () => {
 			if (devMode) console.log("SettingsMenuInjector cleanup called")
 			this.hide()

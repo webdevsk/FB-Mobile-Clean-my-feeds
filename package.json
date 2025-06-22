@@ -51,5 +51,8 @@
     "@run-at": "document-end",
     "@downloadURL": "https://update.greasyfork.org/scripts/479868/FB%20Mobile%20-%20Clean%20my%20feeds.user.js",
     "@updateURL": "https://update.greasyfork.org/scripts/479868/FB%20Mobile%20-%20Clean%20my%20feeds.meta.js"
+  },
+  "dependencies": {
+    "typescript": "^5.8.3"
   }
 }

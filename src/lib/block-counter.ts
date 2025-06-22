@@ -1,3 +1,5 @@
+import { devMode } from "@/config"
+
 /**
  * A singleton class that manages a counter display showing the number of whitelisted and blacklisted items.
  * The counter is displayed in the top-right corner of the viewport and updates in real-time.
@@ -67,8 +69,10 @@ export class BlockCounter {
 				pointerEvents: "none",
 			})
 			document.body.appendChild(this.elm)
+			if (devMode) console.log("block counter register successful")
 		} else if (!document.body.contains(this.elm)) {
 			document.body.appendChild(this.elm)
+			if (devMode) console.log("block counter register successful")
 		}
 
 		this.render()

@@ -1,4 +1,4 @@
-import { theme } from "@/config"
+import { devMode, theme } from "@/config"
 
 type DestroyFunction = () => void
 
@@ -31,14 +31,19 @@ export class MenuButtonsInjector {
 	public inject(): DestroyFunction {
 		if (this.buttonsInjected) {
 			console.warn("Menu buttons already injected")
-			return this.destroy.bind(this)
+			return () => {
+				this.destroy()
+			}
 		}
 
-		this.setupTabBarStyles()
+		// this.setupTabBarStyles()
 		this.injectButtons()
 		this.buttonsInjected = true
+		if (devMode) console.log("Menu buttons injected successfully")
 
-		return this.destroy.bind(this)
+		return () => {
+			this.destroy()
+		}
 	}
 
 	/**
@@ -73,7 +78,10 @@ export class MenuButtonsInjector {
 	 */
 	private injectButtons(): void {
 		const titleBarEle = document.querySelector(".filler")?.nextElementSibling
-		if (!titleBarEle || !(titleBarEle instanceof HTMLElement)) return
+		if (!titleBarEle || !(titleBarEle instanceof HTMLElement)) {
+			if (devMode) console.error("Title bar element not found")
+			return
+		}
 
 		const innerScreenText =
 			document.querySelector("#screen-root .fixed-container.top .f2")
@@ -113,6 +121,7 @@ export class MenuButtonsInjector {
 
 		// Remove all injected buttons
 		this.buttonElements.forEach(button => {
+			if (devMode) console.log("Removing button:", button)
 			button.remove()
 		})
 		this.buttonElements = []

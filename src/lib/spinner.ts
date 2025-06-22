@@ -1,3 +1,5 @@
+import { devMode } from "@/config"
+
 /**
  * A singleton class that manages a loading spinner UI element.
  * The spinner is displayed in the top-left corner of the viewport and can be shown/hidden on demand.
@@ -63,8 +65,10 @@ export class Spinner {
 			})
 			this.elm.innerHTML = `<div class="spinner small animated"></div>`
 			document.body.appendChild(this.elm)
+			if (devMode) console.log("Spinner register successful")
 		} else if (!document.body.contains(this.elm)) {
 			document.body.appendChild(this.elm)
+			if (devMode) console.log("Spinner register successful")
 		}
 		return () => this.destroy()
 	}
