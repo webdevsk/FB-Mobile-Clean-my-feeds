@@ -1,0 +1,220 @@
+.dialog-screen {
+	position: fixed;
+	inset: 0;
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-end;
+	background-color: rgba(0, 0, 0, 0.49803922);
+	overflow-y: auto;
+}
+
+.settings-container {
+	/* for the bg class */
+	position: relative;
+	padding-inline: 0.5rem;
+	padding-block: 2rem;
+
+	.settings-header {
+		padding: 0.5rem 1rem;
+		margin-bottom: 1rem;
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		.settings-title {
+			font-size: 1.5rem;
+			font-weight: 600;
+		}
+	}
+
+	.settingsItem {
+		display: grid;
+		min-height: 2.5rem;
+		gap: 0.75rem;
+		align-items: center;
+		padding: 0.5rem;
+		grid-template-columns: max-content minmax(0, 1fr) max-content;
+		* {
+			pointer-events: none;
+		}
+		.settingsIcon {
+			font-size: 1.5rem;
+		}
+		.settingsLabel {
+			display: block;
+			font-size: 1rem;
+			font-weight: 600;
+		}
+
+		.settingsDescription {
+			display: block;
+			white-space: nowrap;
+			width: 100%;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+	}
+}
+
+.bg-fallback::before {
+	position: absolute;
+	content: "";
+	width: 100%;
+	height: 100%;
+	top: 0;
+	left: 0;
+	background-color: rgba(36,37,38,1.0);
+	z-index: -1;
+}
+
+.icon-bg-fallback::before {
+	position: absolute;
+	content: "";
+	background-color: rgba(255, 255, 255, 0.10196078431372549);
+	border-radius: 50%;
+	left: calc((100% - var(--diameter)) / 2);
+	top: calc((100% - var(--diameter)) / 2);
+	width: var(--diameter);
+	height: var(--diameter);
+	z-index: -1;
+}
+
+/* Modified checkboxes for settings screen */
+.fb-check {
+	display: inline-flex;
+	align-items: center;
+	cursor: pointer;
+	font-family: sans-serif;
+	user-select: none;
+	vertical-align: middle;
+
+	input {
+		display: none;
+	}
+
+	.checkmark {
+		width: 18px;
+		height: 18px;
+		border: 2px solid currentColor;
+		border-radius: 3px;
+		position: relative;
+		transition: background-color 0.2s ease;
+	}
+
+	input:checked + .checkmark {
+		background-color: #1877f2;
+	}
+
+	input:checked + .checkmark::after {
+		content: "";
+		position: absolute;
+		left: 4px;
+		top: 0px;
+		width: 5px;
+		height: 10px;
+		border: solid white;
+		border-width: 0 2px 2px 0;
+		transform: rotate(45deg);
+	}
+}
+
+.customBtns {
+	width: 45px;
+	height: 43px;
+	z-index: 2;
+	position: absolute;
+	pointer-events: all !important;
+
+	&#settingsBtn {
+		left: calc(100dvw - 138px);
+	}
+
+	&#feedsBtn {
+		left: calc(100dvw - 180px);
+	}
+
+	& > div {
+		margin-top: 4px;
+		height: 35px;
+		z-index: 0;
+		width: 35px;
+		margin-left: 5px;
+		--diameter: 35px;
+		position: relative;
+		box-sizing: border-box;
+		display: flex;
+		flex-direction: column;
+		flex-shrink: 0;
+	}
+
+	img {
+		filter: grayscale(1);
+		object-fit: contain;
+		position: absolute;
+		width: 100%;
+		height: 100%;
+	}
+}
+
+div[data-purged="true"] {
+	height: 32px;
+	overflow-y: hidden;
+	pointer-events: none;
+	position: relative;
+
+	&[data-force-hide="true"] {
+		height: 0px;
+		overflow-y: hidden;
+		pointer-events: none;
+	}
+
+	& > div {
+		/* opacity: 0; */
+		display: none !important;
+	}
+
+	.placeholder {
+		position: absolute;
+		inset: 0;
+		display: grid;
+		pointer-events: auto;
+		place-items: center;
+		padding-inline: 0.5rem;
+
+		p {
+			text-overflow: ellipsis;
+			overflow: hidden;
+			white-space: nowrap;
+			width: 100%;
+			text-align: center;
+		}
+	}
+}
+
+/* Removes app install prompt */
+[data-screen-id]:first-child [data-comp-id~="22222"] {
+	display: none !important;
+}
+
+#block-counter {
+	position: fixed;
+	top: 0;
+	left: 0;
+	padding: 0.5rem 1rem;
+	background: #323436;
+	border-radius: 0.2rem;
+	display: flex;
+	flex-wrap: wrap;
+	z-index: 99;
+	color: #ddd;
+	gap: 0.5rem;
+	font-size: 0.8rem;
+	pointer-events: none;
+}
+
+#spinner {
+	position: fixed;
+	top: 20px;
+	left: 16px;
+	pointer-events: none;
+	z-index: 100;
+}
