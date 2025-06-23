@@ -62,7 +62,7 @@
 	height: 100%;
 	top: 0;
 	left: 0;
-	background-color: rgba(240, 242, 245, 1);
+	background-color: rgba(36,37,38,1.0);
 	z-index: -1;
 }
 
@@ -218,7 +218,3 @@ div[data-purged="true"] {
 	pointer-events: none;
 	z-index: 100;
 }
-/* 
-.startup-marker{
-	margin-top: 100dvh;
-} */

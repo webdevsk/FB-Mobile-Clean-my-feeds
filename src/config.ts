@@ -28,6 +28,11 @@ export const postContainerSelector = "[data-pull-to-refresh-action-id]"
  */
 export const possibleTargetsSelectorInPost =
 	"span.f2:not(.a), span.f5, [style^='margin-top:9px; height:21px'] > .native-text"
+
+/**
+ * navBarSelector is the element which contains the navigation bar
+ */
+export const navBarSelector = "[role='tablist']"
 /**
  * showPlaceholder is whether to show placeholder or not
  */

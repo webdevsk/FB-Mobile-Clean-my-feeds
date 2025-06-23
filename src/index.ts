@@ -1,13 +1,14 @@
+import { bodyId, devMode } from "@/config"
 import { BlockCounter } from "@/lib/block-counter"
+import { makeNavbarSticky } from "@/lib/make-navbar-sticky"
+import { MenuButtonsInjector } from "@/lib/menu-buttons-injector"
+import { onReadyForScripting } from "@/lib/on-ready-for-scripting"
+import { registerAutoReloadAfterIdle } from "@/lib/register-auto-reload-after-idle"
+import { runFeedsCleaner } from "@/lib/run-feeds-cleaner"
+import { SettingsMenuInjector } from "@/lib/settings-menu-injector"
+import { updateThemeConfigWhenPossible } from "@/lib/updateThemeConfigWhenPossible"
+import { WhitelistedFiltersStorage } from "@/lib/whitelisted-filters-storage"
 import STYLES from "@/styles/style.css"
-import { bodyId, devMode, postContainerSelector, theme } from "./config"
-import { MenuButtonsInjector } from "./lib/menu-buttons-injector"
-import { onReadyForScripting } from "./lib/on-ready-for-scripting"
-import { registerAutoReloadAfterIdle } from "./lib/register-auto-reload-after-idle"
-import { runFeedsCleaner } from "./lib/run-feeds-cleaner"
-import { SettingsMenuInjector } from "./lib/settings-menu-injector"
-import { WhitelistedFiltersStorage } from "./lib/whitelisted-filters-storage"
-import { watchForSelectors } from "./utils/watch-for-selectors"
 
 ;(() => {
 	// Make sure this is the React-Mobile version of facebook
@@ -20,7 +21,6 @@ import { watchForSelectors } from "./utils/watch-for-selectors"
 
 	onReadyForScripting(() => {
 		console.log("Ready for scripting")
-
 		// Store all abort functions
 		const aborts: Array<() => void> = [
 			updateThemeConfigWhenPossible(),
@@ -37,6 +37,8 @@ import { watchForSelectors } from "./utils/watch-for-selectors"
 			registerAutoReloadAfterIdle(),
 		]
 
+		makeNavbarSticky()
+
 		return () => {
 			console.log("Not Ready for scripting")
 			// Cleanup code like removing dom nodes and destroying event listeners
@@ -45,39 +47,3 @@ import { watchForSelectors } from "./utils/watch-for-selectors"
 		}
 	})
 })()
-
-const updateThemeConfigWhenPossible = () =>
-	watchForSelectors(
-		[
-			".native-text:last-child",
-			'[role="tablist"]>*:last-child .native-text',
-			'[aria-label="Search Facebook"] [class*="bg-"]',
-		],
-		() => {
-			const bgClassName = document
-				.querySelector('[role="tablist"]>*:last-child')!
-				.classList.values()
-				.find(v => v.startsWith("bg-"))
-
-			const iconBgClassName = document
-				.querySelector('[aria-label="Search Facebook"] [class*="bg-"]')!
-				.classList.values()
-				.find(v => v.startsWith("bg-"))
-
-			if (!bgClassName || !iconBgClassName) return
-
-			theme.bgClassName = bgClassName
-			theme.iconBgClassName = iconBgClassName
-			theme.textColor = getComputedStyle(
-				document.querySelector(".native-text:last-child")!
-			).color
-			theme.iconColor = getComputedStyle(
-				document.querySelector('[role="tablist"]>*:last-child .native-text')!
-			).color
-			if (devMode) console.log("Theme assignment successful")
-		},
-		{
-			// It will be there when the update is actually called
-			target: document.querySelector(postContainerSelector)!,
-		}
-	)

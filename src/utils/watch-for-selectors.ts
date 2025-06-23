@@ -130,3 +130,5 @@ export function watchForSelectorsPromise(
 		)
 	})
 }
+
+// Developed by [webdevsk](https://github.com/webdevsk)
