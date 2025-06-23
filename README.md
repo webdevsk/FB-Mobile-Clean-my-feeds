@@ -125,6 +125,10 @@ Facebook has an enhanced Mobile version of facebook which only works on Chromium
 
 ⭐ Want to contribute? Refer to the [Contribution][Contribution] page.
 
+⭐ Buy me a coffee
+
+- [![Binance](https://img.shields.io/badge/Binance-181717?style=for-the-badge&logo=binance&logoColor=white)](https://github.com/webdevsk/webdevsk?tab=readme-ov-file#buy-me-a-coffee)
+
 #### For PC browsers, you can try these instead:
 
 - https://github.com/zbluebugz/facebook-clean-my-feeds
