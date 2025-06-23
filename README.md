@@ -68,11 +68,11 @@ Though development is/will be slow as I'm struggling with my Career. Feel free t
 
 ### How to use
 
-1. Install `Quetta Browser` <a href="https://play.google.com/store/apps/details?id=net.quetta.browser" target="_blank">Android</a> or <a href="https://apps.apple.com/us/app/quetta-ad-free-video-browser/id6504077999" target="_blank">IOS</a>
-1. Launch `Quetta Browser` then Install <a href="https://chromewebstore.google.com/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo" target="_blank">Tampermonkey</a> or <a href="https://chromewebstore.google.com/detail/%E8%84%9A%E6%9C%AC%E7%8C%AB-beta/ndcooeababalnlpkfedmmbbbgkljhpjf" target="_blank">ScriptCat</a> extension from Chrome Web Store.
-1. **(Optional)** Install <a href="https://chromewebstore.google.com/detail/ublock-origin/cjpalhdlnbpafiamejdnhcphjbkeiagm" target="_blank">uBlock Origin</a> extension.
+1. Install `Quetta Browser` [Android](https://play.google.com/store/apps/details?id=net.quetta.browser) or [IOS](https://apps.apple.com/us/app/quetta-ad-free-video-browser/id6504077999)
+1. Launch `Quetta Browser` then Install [Tampermonkey](https://chromewebstore.google.com/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo) or [ScriptCat](https://chromewebstore.google.com/detail/%E8%84%9A%E6%9C%AC%E7%8C%AB-beta/ndcooeababalnlpkfedmmbbbgkljhpjf) extension from Chrome Web Store.
+1. **(Optional)** Install [uBlock Origin](https://chromewebstore.google.com/detail/ublock-origin/cjpalhdlnbpafiamejdnhcphjbkeiagm) extension.
    - Not required for this script but will improve your overall browsing experience by a mile.
-1. Head over to this link and Press `Install` and Confirm installation: <a href="https://greasyfork.org/en/scripts/479868-fb-mobile-clean-my-feeds" target="_blank">GreasyFork</a>
+1. Head over to this link and Press `Install` and Confirm installation: [GreasyFork](https://greasyfork.org/en/scripts/479868-fb-mobile-clean-my-feeds)
 1. Browse https://m.facebook.com/ without all the trash.
 
 #### (Optional and unstable) Install it as an app:
@@ -84,7 +84,7 @@ Though development is/will be slow as I'm struggling with my Career. Feel free t
 1. Find it in your Android Home screen
 
 #### Browser/Extension Alternatives:
-Please refer to this link to find other alternatives if my suggested combination doesn't work for you: <a target="_blank" href="https://github.com/KudoAI/googlegpt#-compatibility">https://github.com/KudoAI/googlegpt#-compatibility</a>
+Please refer to this link to find other alternatives if my suggested combination doesn't work for you: https://github.com/KudoAI/googlegpt#-compatibility
 
 
 ### Changelog
@@ -132,6 +132,6 @@ Facebook has an enhanced Mobile version of facebook which only works on Chromium
 
 _They are not affiliated or associated with me in any way._
 
-[Contribution]:https://github.com/webdevsk/FB-Mobile-Clean-my-feeds/blob/main/CONTRIBUTION
+[Contribution]:CONTRIBUTION.md
 [GreasyForkShield]: https://img.shields.io/badge/GreasyFork-570000?style=for-the-badge&logo=tampermonkey&logoColor=white
 [GitHubShield]: https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white
