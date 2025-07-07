@@ -5,6 +5,16 @@ export interface LocationChangeDetail {
 	oldUrl: URL
 }
 
+/** Refers to the root window object. unsafeWindow in userscripts and window in other contexts */
+const _window = unsafeWindow || window
+const WATCHER_KEY = "__spa_locationchange_watcher__"
+
+declare global {
+	interface Window {
+		[WATCHER_KEY]: boolean
+	}
+}
+
 /**
  * Fires "spa:locationchange" event when url changes
  * @returns {Object} An object with a `run` method to start the location watcher.
@@ -22,21 +32,23 @@ export interface LocationChangeDetail {
 export function createLocationWatcher() {
 	let interval: number | null = null
 	let oldUrl: URL | null = null
+	console.log("watcher", _window[WATCHER_KEY])
 	return {
 		/**
 		 * Ensure the location watcher is actively looking for URL changes. If it's already watching,
 		 * this is a noop.
 		 */
 		run() {
-			if (interval != null) return
+			if (interval != null || _window[WATCHER_KEY] === true) return
+			_window[WATCHER_KEY] = true
 			oldUrl = new URL(location.href)
-			interval = window.setInterval(() => {
+			interval = _window.setInterval(() => {
 				const newUrl = new URL(location.href)
 				if (oldUrl && newUrl.href !== oldUrl.href) {
-					window.dispatchEvent(
+					_window.dispatchEvent(
 						new CustomEvent("spa:locationchange", {
 							detail: { newUrl, oldUrl },
-						}),
+						})
 					)
 					oldUrl = newUrl
 				}
