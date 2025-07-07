@@ -1,10 +1,11 @@
 import {
 	devMode,
-	pathnameMatches,
 	postContainerSelector,
 	routeNodeSelector,
+	runScriptOn,
 	screenRootSelector,
 } from "@/config"
+import { getCurrentPage } from "@/lib/get-current-page"
 import { watchForSelectorsPromise } from "@/utils/watch-for-selectors"
 
 type CleanupFn = () => void | PromiseLike<void>
@@ -31,10 +32,13 @@ export const onReadyForScripting = async (
 	// Wait for screen root to be present
 	await watchForSelectorsPromise([screenRootSelector])
 	onNavigation((routeNode: HTMLElement) => {
-		if (devMode) console.log("onNavigation callback called")
-		// Terminate if we are not on the main page
-		if (!pathnameMatches.some(pathname => pathname === location.pathname)) {
-			if (devMode) console.log("Not on main page. Terminating...")
+		if (devMode) {
+			console.log("onNavigation callback called")
+			console.log("Current page: ", getCurrentPage())
+		}
+		// Terminate if we are not on the target pages
+		if (!runScriptOn.some(page => getCurrentPage() === page)) {
+			if (devMode) console.log("Not on target pages. Terminating...")
 			return () => null
 		}
 		// Run main function if the target node is present

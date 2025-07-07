@@ -3,10 +3,6 @@
  */
 export const devMode = false
 /**
- * pathnameMatches is the list of paths to match. If any of them matches, the script will run
- */
-export const pathnameMatches = ["/"]
-/**
  * bodyId is the id of the body element. Comes with HTML. It will surely be there
  */
 export const bodyId = "app-body"
@@ -26,6 +22,7 @@ export const postContainerSelector = "[data-pull-to-refresh-action-id]"
 /**
  * possibleTargetsInPost are the elements which may contain our target keywords
  */
+
 export const possibleTargetsSelectorInPost =
 	"span.f2:not(.a), span.f5, [style^='margin-top:9px; height:21px'] > .native-text"
 
@@ -33,6 +30,26 @@ export const possibleTargetsSelectorInPost =
  * navBarSelector is the element which contains the navigation bar
  */
 export const navBarSelector = "[role='tablist']"
+/**
+ * aria-label of the main navigation bar buttons. The active one should have the attribute aria-selected="true"
+ */
+export const ariaLabelOfNavBarButtons = {
+	feed: "feed",
+	friends: "friends",
+	messages: "messages",
+	videos: "videos",
+	notifications: "notifications",
+	marketplace: "marketplace",
+} as const
+/**
+ * Main pages based on navigation bar buttons
+ */
+export type MainPagesBasedOnNavBarButtons =
+	(typeof ariaLabelOfNavBarButtons)[keyof typeof ariaLabelOfNavBarButtons]
+/**
+ * pages to run the script on
+ */
+export const runScriptOn: MainPagesBasedOnNavBarButtons[] = ["feed", "videos"]
 /**
  * showPlaceholder is whether to show placeholder or not
  */

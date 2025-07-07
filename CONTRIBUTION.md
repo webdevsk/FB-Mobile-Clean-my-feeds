@@ -41,7 +41,7 @@ bun run build:greasyfork
 
 * [dist](dist) - Built files (Output)
 * [src](src) - Source files
-	+ [config.ts](src/config.ts) - Global config like devMode, pathnameMatches, node selectors, theme configuration, etc
+	+ [config.ts](src/config.ts) - Global config like devMode, runScriptOn, node selectors, theme configuration, etc
 	+ [index.ts](src/index.ts) - Entry point. Code starts here
 	+ [data](src/data) - Data files
 		- [filters-database.ts](src/data/filters-database.ts) - Filter database. This is where you can add new categories, as well as the entries for settings menu
