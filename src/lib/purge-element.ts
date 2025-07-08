@@ -2,12 +2,14 @@ import { showPlaceholder, theme } from "@/config"
 
 export const purgeElement = ({
 	element,
+	filter,
 	reason,
 	author,
 	placeHolderMessage,
 	sponsoredFilters,
 }: {
 	element: HTMLElement
+	filter: string
 	reason: string
 	author: string
 	placeHolderMessage: string
@@ -15,6 +17,7 @@ export const purgeElement = ({
 }) => {
 	element.tabIndex = -1
 	element.dataset.purged = "true"
+	element.dataset.reason = reason
 
 	// Sponsored posts get removed in an "out of order" fashion automatically.
 	// Having placeholder inside them results in a  scroll jump
@@ -25,7 +28,7 @@ export const purgeElement = ({
 
 		const overlay = document.createElement("article")
 		overlay.className = "placeholder"
-		overlay.innerHTML = `<p style="color: ${theme.textColor}">${placeHolderMessage}: ${author} (${reason})</p>`
+		overlay.innerHTML = `<p style="color: ${theme.textColor}">${placeHolderMessage}: ${author} (${filter})</p>`
 		element.appendChild(overlay)
 	} else {
 		// Hide elements by resizing to 0px

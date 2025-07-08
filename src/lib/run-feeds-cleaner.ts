@@ -3,7 +3,7 @@ import {
 	possibleTargetsSelectorInPost,
 	postContainerSelector,
 } from "@/config"
-import { filtersDatabase } from "@/data/filters-database"
+import { filterTitlePerKeywordIndex, filtersDatabase } from "@/data/filters-database"
 import { keywordsPerLanguage } from "@/data/keywords-per-language"
 import { BlockCounter } from "@/lib/block-counter"
 import { getOwnLangFilters } from "./get-own-language-filters"
@@ -36,10 +36,11 @@ export const runFeedsCleaner = (): (() => void) => {
 			)
 		)
 	}
-	// Set active filters initiallu
+	// Set active filters initially
 	setActiveFilters(whitelistedFilters)
 	// Listen for changes
-	whitelistedStorageInstance.onChange(setActiveFilters)
+	const unsubscribeFeedsChangeEvent =
+		whitelistedStorageInstance.onChange(setActiveFilters)
 
 	const sponsoredFilters = getOwnLangFilters(
 		filtersDatabase.sponsored.keywordsDB
@@ -51,21 +52,27 @@ export const runFeedsCleaner = (): (() => void) => {
 	const checkElement = (element: HTMLElement) => {
 		// Handled already
 		if (element.dataset.purged === "true") return
-		let suspect: boolean = false
-		let reason: string | null = null
-		let raw: string | null = null
+		let flagged: boolean = false
+		let matchedfilter: string
+		let reason: string
 
 		for (const span of element.querySelectorAll(
 			possibleTargetsSelectorInPost
 		)) {
-			if (!activeFilters.some(str => span.textContent?.includes(str))) continue
-			suspect = true
-			reason = span.innerHTML.split("󰞋")[0]
-			raw = span.innerHTML
-			break
+			let done: boolean = false
+			for (const filter of activeFilters){
+				if (!span.textContent?.includes(filter)) continue
+				flagged = true
+				matchedfilter = filterTitlePerKeywordIndex.get(filter)!
+				reason = span.innerHTML
+				if (devMode) console.log(`Flagged post containing: "${reason}" with filter: "${matchedfilter}"`)
+				done = true
+				break
+			}
+			if (done) break
 		}
 
-		if (!suspect) {
+		if (!flagged) {
 			BlockCounter.getInstance().increaseWhite()
 			return
 		}
@@ -73,10 +80,11 @@ export const runFeedsCleaner = (): (() => void) => {
 
 		purgeElement({
 			element,
-			reason: reason ?? raw ?? "",
+			reason: reason!,
 			author: element.querySelector("span.f2")?.innerHTML ?? "",
 			placeHolderMessage,
 			sponsoredFilters,
+			filter: matchedfilter!,
 		})
 	}
 
@@ -120,6 +128,7 @@ export const runFeedsCleaner = (): (() => void) => {
 		console.log("Mutation observer setup for new posts done on", root)
 	return () => {
 		observer.disconnect()
+		unsubscribeFeedsChangeEvent()
 		if (devMode) console.log("Mutation observer for posts disconnected")
 	}
 }
