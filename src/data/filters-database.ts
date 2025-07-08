@@ -36,9 +36,15 @@ export const filtersDatabase: Record<string, FiltersDatabaseItem> = {
 		keywordsDB: keywordsPerLanguage.peopleYouMayKnow,
 	},
 	uncategorized: {
-		title: "Uncategorized",
+		title: "Follow/Join",
 		description: "Removes suggested pages with join/follow link",
 		icon: "󱠂",
 		keywordsDB: keywordsPerLanguage.uncategorized,
 	},
 }
+
+export const filterTitlePerKeywordIndex = new Map<string, string>(
+	Object.entries(filtersDatabase).flatMap(([_category, { title, keywordsDB }]) =>
+		Object.values(keywordsDB).flatMap((keyword) => Array.isArray(keyword) ? keyword.map(k => [k, title]) : [[keyword, title]])
+	)
+)

@@ -53,6 +53,7 @@ export class SettingsMenuInjector {
       <div class="settingsIcon native-text" style="color: ${theme.iconColor}"><span>${closeMenuIcon}</span></div>
       <div class="settingsLabelContainer">
         <span class="settingsLabel">Close Menu</span>
+        <span class="settingsDescription" style="color: ${theme.iconColor}" >Changes take effect on newly retrieved posts</span>
       </div>
     </div>`
 				)}
