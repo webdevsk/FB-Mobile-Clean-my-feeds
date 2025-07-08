@@ -36,10 +36,11 @@ export const runFeedsCleaner = (): (() => void) => {
 			)
 		)
 	}
-	// Set active filters initiallu
+	// Set active filters initially
 	setActiveFilters(whitelistedFilters)
 	// Listen for changes
-	whitelistedStorageInstance.onChange(setActiveFilters)
+	const unsubscribeFeedsChangeEvent =
+		whitelistedStorageInstance.onChange(setActiveFilters)
 
 	const sponsoredFilters = getOwnLangFilters(
 		filtersDatabase.sponsored.keywordsDB
@@ -120,6 +121,7 @@ export const runFeedsCleaner = (): (() => void) => {
 		console.log("Mutation observer setup for new posts done on", root)
 	return () => {
 		observer.disconnect()
+		unsubscribeFeedsChangeEvent()
 		if (devMode) console.log("Mutation observer for posts disconnected")
 	}
 }

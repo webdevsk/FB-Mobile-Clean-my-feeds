@@ -1,5 +1,6 @@
 import { devMode } from "@/config"
 
+type FiltersValue = string[]
 /**
  * Manages whitelisted filters storage. Stores in userscript manager storage.
  */
@@ -7,20 +8,35 @@ export class WhitelistedFiltersStorage {
 	/**
 	 * The storage key for the whitelisted filters.
 	 */
-	storageKey: string = "whitelisted-filters"
-	listenerId: string | null = null
+	public storageKey: string = "whitelisted-filters"
+	// listenerId: string | null = null
 	/**
 	 * The default value for the whitelisted filters.
 	 */
-	defaultValue: string[] = []
+	private defaultValue: FiltersValue = []
 	/**
 	 * The cache for the whitelisted filters.
 	 */
-	cache: string[] = []
+	private cache: FiltersValue = []
 	/**
 	 * The singleton instance of WhitelistedFiltersStorage.
 	 */
 	static instance: WhitelistedFiltersStorage | null = null
+	/**
+	 * The listeners for the whitelisted filters.
+	 */
+	private listeners: Set<(value: FiltersValue) => void> = new Set()
+	/**
+	 * Notifies all listeners of a change to the value.
+	 * @param {FiltersValue} newValue - The new value
+	 */
+	private notifyListeners(newValue: FiltersValue): void {
+		for (const listener of this.listeners) listener(newValue)
+	}
+
+	constructor() {
+		this.cache = GM_getValue(this.storageKey, this.defaultValue)
+	}
 
 	/**
 	 * Gets the singleton instance of WhitelistedFiltersStorage.
@@ -35,49 +51,39 @@ export class WhitelistedFiltersStorage {
 		return WhitelistedFiltersStorage.instance
 	}
 
-	public register(): () => void {
-		const initialValue = GM_getValue(this.storageKey, this.defaultValue)
-		this.update(initialValue)
-		if (devMode) console.log("WhitelistedFiltersStorage register successful")
-
-		return this.onChange()
-	}
-
-	private update(value: unknown): void {
-		if (Array.isArray(value) && value.every(val => typeof val === "string")) {
-			this.cache = value
-		} else {
-			this.cache = this.defaultValue
-			this.set(this.defaultValue)
-		}
-	}
 	/**
 	 * Gets the whitelisted filters from storage.
-	 * @returns {string[]} The whitelisted filters
+	 * @returns {FiltersValue} The whitelisted filters
 	 */
-	public get(): string[] {
+	public get(): FiltersValue {
 		return this.cache
 	}
+
 	/**
 	 * Sets the whitelisted filters in storage.
-	 * @param {string[]} filters - The whitelisted filters to set
+	 * @param {FiltersValue} value - The whitelisted filters to set
 	 */
-	public set(filters: string[]) {
-		if (devMode) console.log("Set new filters", filters)
-		GM_setValue(this.storageKey, filters)
+	public set(value: FiltersValue): void {
+		if (!Array.isArray(value) || !value.every(val => typeof val === "string")) {
+			console.error("Invalid value set for whitelisted filters", value)
+			return
+		}
+		if (devMode) console.log("Set new filters", value)
+		GM_setValue(this.storageKey, value)
+		this.cache = value
+		this.notifyListeners(value)
 	}
 
-	public onChange(cb?: (newValue: string[]) => void): () => void {
-		this.listenerId = GM_addValueChangeListener(
-			this.storageKey,
-			(_name, _oldValue, newValue, _remote) => {
-				if (devMode) console.log("New filter value", newValue)
-				this.update(newValue)
-				cb?.(this.get())
-			}
-		)
+	/**
+	 * Adds a change listener to the storage and returns a function to remove the listener.
+	 * @param {cb} cb - The callback function to be called when the value changes
+	 * @returns {() => void} The unsubscribe function
+	 */
+	public onChange(cb: (value: FiltersValue) => void): () => void {
+		this.listeners.add(cb)
+		// Return unsubscribe function
 		return () => {
-			if (this.listenerId) GM_removeValueChangeListener(this.listenerId)
+			this.listeners.delete(cb)
 		}
 	}
 }

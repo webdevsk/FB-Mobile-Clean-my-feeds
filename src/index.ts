@@ -8,7 +8,6 @@ import { registerAutoReloadAfterIdle } from "@/lib/register-auto-reload-after-id
 import { runFeedsCleaner } from "@/lib/run-feeds-cleaner"
 import { SettingsMenuInjector } from "@/lib/settings-menu-injector"
 import { updateThemeConfigWhenPossible } from "@/lib/updateThemeConfigWhenPossible"
-import { WhitelistedFiltersStorage } from "@/lib/whitelisted-filters-storage"
 import STYLES from "@/styles/style.css"
 ;(() => {
 	// Make sure this is the React-Mobile version of facebook
@@ -25,7 +24,6 @@ import STYLES from "@/styles/style.css"
 			updateThemeConfigWhenPossible(),
 			// Show counter on top
 			...(devMode ? [BlockCounter.getInstance().register()] : []),
-			WhitelistedFiltersStorage.getInstance().register(),
 
 			// Inject menu buttons and settingsMenu only if we are on the feed page
 			...(getCurrentPage() === "feed"
