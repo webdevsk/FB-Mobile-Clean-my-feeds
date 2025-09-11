@@ -1,3 +1,11 @@
+/* DOM fixes */
+
+/* fix comment box height */
+textarea[style*="height"] {
+    height: 100% !important;
+}
+
+/* Script styles */
 .dialog-screen {
 	position: fixed;
 	inset: 0;
@@ -190,10 +198,6 @@ div[data-purged="true"] {
 	}
 }
 
-/* Removes app install prompt */
-[data-screen-id]:first-child [data-comp-id~="22222"] {
-	display: none !important;
-}
 
 #block-counter {
 	position: fixed;

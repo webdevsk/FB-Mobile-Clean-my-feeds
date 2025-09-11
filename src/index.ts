@@ -8,7 +8,9 @@ import { registerAutoReloadAfterIdle } from "@/lib/register-auto-reload-after-id
 import { runFeedsCleaner } from "@/lib/run-feeds-cleaner"
 import { SettingsMenuInjector } from "@/lib/settings-menu-injector"
 import { updateThemeConfigWhenPossible } from "@/lib/updateThemeConfigWhenPossible"
-import STYLES from "@/styles/style.css"
+import STYLES from "@/style.css"
+import { injectConsole } from "@/utils/inject-console"
+import { removeAppInstallPrompt } from "@/lib/remove-app-install-prompt"
 ;(() => {
 	// Make sure this is the React-Mobile version of facebook
 	if (document.body.id !== bodyId) {
@@ -16,9 +18,13 @@ import STYLES from "@/styles/style.css"
 		return
 	}
 
+	injectConsole("FB Mobile - Clean my feeds (UserScript)")
+	GM_addStyle(STYLES)
+
 	onReadyForScripting(() => {
 		console.log("Ready for scripting")
-		const styleNode = GM_addStyle(STYLES)
+
+		removeAppInstallPrompt()
 		// Store all abort functions
 		const aborts: Array<() => void> = [
 			updateThemeConfigWhenPossible(),
@@ -45,7 +51,6 @@ import STYLES from "@/styles/style.css"
 
 		return () => {
 			console.log("Not Ready for scripting")
-			styleNode.remove()
 			// Cleanup code like removing dom nodes and destroying event listeners
 			aborts.forEach(abort => abort?.())
 			aborts.length = 0
