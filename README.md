@@ -5,10 +5,15 @@
         <img width="100" height="100" src="./src/logo.png" alt="sweeper logo"/>
     </a>
 
-<h2 align="center">FB Mobile - Clean my feeds (UserScript)</h2>
+<h2 align="center">FB Mobile - Clean my feeds (UserScript)(EOL)</h2>
 
 | [![GreasyFork][GreasyForkShield]](https://greasyfork.org/en/scripts/479868-fb-mobile-clean-my-feeds) | [![GitHub][GitHubShield]](https://github.com/webdevsk/FB-Mobile-Clean-my-feeds) |
 |----------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------|
+
+**⚠️ End of Life for the UserScript**
+#### Due to the bloat, compatibility issues with Userscript managers and their instability on Mobile browsers, I've ported this userscript to a standalone Browser Extension ensuring stability, easy installation and additional PWA capabilities. So while this userscript works, I will not be maintaining it anymore. 
+
+#### Please refer to the Browser extension repo to install it from your preferred Extension Store (Available in both Chrome Web Store and Mozilla Addon Store for Firefox): [FB Mobile - Clean my feeds (Browser Extension)](https://github.com/webdevsk/fb-mobile-clean-my-feeds-ext/)
 
 </div>
 
@@ -88,6 +93,12 @@ Please refer to this link to find other alternatives if my suggested combination
 
 
 ### Changelog
+- **v1.03**-EOL
+  - Updated relevant changes from Browser extension version 1.03 
+- **v1.02**
+  - Improved compatibility with other userscript managers that don't support GM_addValueChangeListener api
+- **v1.01**
+  - Improved navigation detection
 - **v1.00**
   - Source code converted to TypeScript and split into multiple files as it was getting harder to maintain in a single file. Please refer to [Contribution][Contribution] page for more information including the build process.
   - Full code overhaul. Made to be more maintainable and easier to understand. As well as easily extendable and efficient on browser performance.

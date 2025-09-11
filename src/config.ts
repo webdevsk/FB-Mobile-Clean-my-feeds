@@ -49,7 +49,7 @@ export type MainPagesBasedOnNavBarButtons =
 /**
  * pages to run the script on
  */
-export const runScriptOn: MainPagesBasedOnNavBarButtons[] = ["feed", "videos"]
+export const runScriptOn: MainPagesBasedOnNavBarButtons[] = ["feed"]
 /**
  * showPlaceholder is whether to show placeholder or not
  */

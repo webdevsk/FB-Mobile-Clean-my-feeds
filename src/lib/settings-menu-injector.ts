@@ -83,7 +83,8 @@ export class SettingsMenuInjector {
 	}
 
 	private handleDocumentClick = (event: MouseEvent) => {
-		const target = event.target as HTMLElement
+		const { target, x, y } = event
+		if (!(target instanceof HTMLElement)) return
 
 		if (target.matches("#settingsBtn")) {
 			this.show()
@@ -105,6 +106,14 @@ export class SettingsMenuInjector {
 					target: document.querySelector(screenRootSelector)!,
 				}
 			)
+		} else if (target.matches(`#${this.overlayId}`)) {
+			const { left, right, top, bottom } = target
+				.querySelector(".settings-container")!
+				.getBoundingClientRect()
+			// When clicked on the empty space
+			if (!(x >= left && x <= right && y >= top && y <= bottom)) {
+				this.hide()
+			}
 		}
 	}
 
