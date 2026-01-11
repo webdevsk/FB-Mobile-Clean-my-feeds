@@ -1,10 +1,5 @@
 /* DOM fixes */
 
-/* fix comment box height */
-textarea[style*="height"] {
-    height: 100% !important;
-}
-
 /* Script styles */
 .dialog-screen {
 	position: fixed;
