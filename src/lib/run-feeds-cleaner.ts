@@ -3,10 +3,13 @@ import {
 	possibleTargetsSelectorInPost,
 	postContainerSelector,
 } from "@/config"
-import { filterTitlePerKeywordIndex, filtersDatabase } from "@/data/filters-database"
+import {
+	filterTitlePerKeywordIndex,
+	filtersDatabase,
+} from "@/data/filters-database"
 import { keywordsPerLanguage } from "@/data/keywords-per-language"
 import { BlockCounter } from "@/lib/block-counter"
-import { getOwnLangFilters } from "./get-own-language-filters"
+import { getGlobalFilters, getOwnLangFilters } from "./get-own-language-filters"
 import { purgeElement } from "./purge-element"
 import { Spinner } from "./spinner"
 import { WhitelistedFiltersStorage } from "./whitelisted-filters-storage"
@@ -30,7 +33,10 @@ export const runFeedsCleaner = (): (() => void) => {
 					.flatMap(filter =>
 						whitelistedFilters.includes(filter)
 							? []
-							: getOwnLangFilters(filtersDatabase[filter].keywordsDB)
+							: [
+									...getGlobalFilters(filtersDatabase[filter].keywordsDB),
+									...getOwnLangFilters(filtersDatabase[filter].keywordsDB),
+								]
 					)
 					.filter(d => d)
 			)
@@ -45,9 +51,9 @@ export const runFeedsCleaner = (): (() => void) => {
 	const sponsoredFilters = getOwnLangFilters(
 		filtersDatabase.sponsored.keywordsDB
 	)
-	const placeHolderMessage = getOwnLangFilters(
+	const [placeHolderMessage] = getGlobalFilters(
 		keywordsPerLanguage.placeholderMessage
-	)[0]
+	)
 
 	const checkElement = (element: HTMLElement) => {
 		// Handled already
@@ -60,12 +66,15 @@ export const runFeedsCleaner = (): (() => void) => {
 			possibleTargetsSelectorInPost
 		)) {
 			let done: boolean = false
-			for (const filter of activeFilters){
+			for (const filter of activeFilters) {
 				if (!span.textContent?.includes(filter)) continue
 				flagged = true
 				matchedfilter = filterTitlePerKeywordIndex.get(filter)!
 				reason = span.innerHTML
-				if (devMode) console.log(`Flagged post containing: "${reason}" with filter: "${matchedfilter}"`)
+				if (devMode)
+					console.log(
+						`Flagged post containing: "${reason}" with filter: "${matchedfilter}"`
+					)
 				done = true
 				break
 			}
