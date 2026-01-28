@@ -1,4 +1,7 @@
-/* DOM fixes */
+/* Hides F.B Purity message */
+#fbpdoesntworkonmobilesite{
+	display: none;
+}
 
 /* Script styles */
 .dialog-screen {
